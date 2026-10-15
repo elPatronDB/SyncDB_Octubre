@@ -14,8 +14,6 @@ import {
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import type { MenuItem } from './menuItems';
 import { useSidebar } from './SidebarContext';
-import { useAuthStore } from '../../../../core/store/authStore';
-import { hasSomePermission } from '../../../../core/utils/permissions';
 
 interface SidebarItemProps {
     item: MenuItem;
@@ -25,30 +23,24 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({ item }) => {
     const location = useLocation();
     const navigate = useNavigate();
     const { isCollapsed, closeMobileSidebar } = useSidebar();
-    const user = useAuthStore((state) => state.user);
-
     const [openSubmenu, setOpenSubmenu] = useState(false);
-
-    // Permission check
-    if (item.permissions && item.permissions.length > 0 && !hasSomePermission(user, item.permissions)) {
-        return null;
-    }
 
     // 1. Group Header
     if (item.group) {
         if (isCollapsed) {
-            return <Divider sx={{ my: 1, borderColor: '#e2e8f0' }} />;
+            return <Divider sx={{ my: 1, borderColor: '#303236' }} />;
         }
         return (
-            <Box sx={{ px: 3, pt: 2, pb: 0.5 }}>
+            <Box sx={{ px: 3, pt: 2.5, pb: 0.5 }}>
                 <Typography
                     variant="caption"
                     sx={{
                         fontSize: '11px',
-                        fontWeight: 700,
-                        color: '#94a3b8',
+                        fontWeight: 600,
+                        color: '#797d86',
                         textTransform: 'uppercase',
-                        letterSpacing: '0.05rem',
+                        letterSpacing: '0.08rem',
+                        fontFamily: 'var(--font-geistmono, monospace)',
                     }}
                 >
                     {item.group}
@@ -79,21 +71,24 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({ item }) => {
             selected={isActive}
             onClick={handleClick}
             sx={{
-                minHeight: 44,
-                px: isCollapsed ? 2 : 2.5,
-                py: 1,
+                minHeight: 40,
+                px: isCollapsed ? 1.5 : 2,
+                py: 0.85,
                 mx: isCollapsed ? 1 : 1.5,
-                my: 0.25,
-                borderRadius: '10px',
+                my: 0.35,
+                borderRadius: '4px',
                 justifyContent: isCollapsed ? 'center' : 'flex-start',
-                backgroundColor: isActive ? 'rgba(0, 107, 255, 0.08)' : 'transparent',
+                backgroundColor: isActive ? 'rgba(52, 213, 154, 0.12)' : 'transparent',
+                border: isActive ? '1px solid rgba(52, 213, 154, 0.3)' : '1px solid transparent',
+                transition: 'all 0.15s ease',
                 '&:hover': {
-                    backgroundColor: isActive ? 'rgba(0, 107, 255, 0.12)' : '#f8fafc',
+                    backgroundColor: isActive ? 'rgba(52, 213, 154, 0.16)' : 'rgba(255, 255, 255, 0.04)',
+                    borderColor: isActive ? '#34d59a' : '#303236',
                 },
                 '&.Mui-selected': {
-                    backgroundColor: 'rgba(0, 107, 255, 0.08)',
+                    backgroundColor: 'rgba(52, 213, 154, 0.12)',
                     '&:hover': {
-                        backgroundColor: 'rgba(0, 107, 255, 0.14)',
+                        backgroundColor: 'rgba(52, 213, 154, 0.18)',
                     },
                 },
             }}
@@ -102,9 +97,10 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({ item }) => {
                 <ListItemIcon
                     sx={{
                         minWidth: 0,
-                        mr: isCollapsed ? 0 : 1.75,
+                        mr: isCollapsed ? 0 : 1.5,
                         justifyContent: 'center',
-                        color: isActive ? '#006bff' : '#64748b',
+                        color: isActive ? '#34d59a' : '#797d86',
+                        transition: 'color 0.15s ease',
                     }}
                 >
                     <IconComponent sx={{ fontSize: 20 }} />
@@ -118,9 +114,10 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({ item }) => {
                         primary: {
                             variant: 'body2',
                             sx: {
-                                fontWeight: isActive ? 600 : 500,
-                                color: isActive ? '#006bff' : '#334155',
+                                fontWeight: isActive ? 600 : 400,
+                                color: isActive ? '#ffffff' : '#c9cbcf',
                                 fontSize: '13px',
+                                letterSpacing: '-0.3px',
                             },
                         },
                     }}
@@ -128,7 +125,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({ item }) => {
             )}
 
             {!isCollapsed && hasChildren && (
-                openSubmenu ? <ExpandLess sx={{ fontSize: 18, color: '#94a3b8' }} /> : <ExpandMore sx={{ fontSize: 18, color: '#94a3b8' }} />
+                openSubmenu ? <ExpandLess sx={{ fontSize: 18, color: '#797d86' }} /> : <ExpandMore sx={{ fontSize: 18, color: '#797d86' }} />
             )}
         </ListItemButton>
     );

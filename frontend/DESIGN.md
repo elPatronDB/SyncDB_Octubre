@@ -1,59 +1,66 @@
-# Seline Analytics — Style Reference
-> Quiet analyst's desk on warm paper
+# Neon — Style Reference
+> Server Room After Dark. A deep black environment where data and interactions are the only sources of light.
 
-**Theme:** light
+**Theme:** dark
 
-Seline sits on a warm-stone canvas (#fafaf9) with a single vivid cyan as its only chromatic accent — every other color is a neutral pulled from the Tailwind stone scale. Headlines use a custom geometric sans (roobert) at weight 400 with tight negative tracking, giving display copy an unhurried, almost whispered authority that contrasts with the usual SaaS shout. UI surfaces are flat white cards floating over the warm background via a single soft 16px-blur shadow; borders are 1px stone hairlines used generously as the primary structural device instead of heavy dividers or panels. The layout breathes: max-width content centered on generous vertical rhythm, with pill-shaped interactive controls, a mascot sticker illustration for personality, and data dashboard screenshots as proof-of-product. The overall feel is editorial analytics — calm, monochrome, confident — where the blue CTA is the loudest thing on the page by deliberate restraint of everything else.
+Source measurements are normalized; roles and recommendations are interpreted. Font summary lists are independent, not paired by position. HTML examples are reconstructions, not source components.
+
+The design feels like a high-end server room after dark — a pure black void where information glows. A strict monochrome palette of pure black (#000000) and white (#ffffff) creates maximum contrast, ensuring text and UI are starkly legible. All visual energy comes from a single, electric green (#34d59a) that mimics terminal output and data visualizations, used exclusively for accents and decorative, code-like background graphics. The system achieves depth not with shadows but with subtle, layered near-black surfaces. A unique tension exists between the pill-shaped buttons and the sharp, 4px corners of all other UI containers.
 
 ## Tokens — Colors
 
 | Name | Value | Token | Role |
 |------|-------|-------|------|
-| Stone Canvas | `#fafaf9` | `--color-stone-canvas` | Page background — warm off-white that reads as paper, not screen-white |
-| Pure White | `#ffffff` | `--color-pure-white` | Card surfaces, elevated panels, input fills — flat and shadowless by default |
-| Stone Border | `#e8e6e5` | `--color-stone-border` | Hairline borders on cards, nav, inputs — the primary structural device, not dividers |
-| Stone Muted | `#d6d3d1` | `--color-stone-muted` | Secondary borders, subtle background tints, decorative separators |
-| Ash Gray | `#a8a29e` | `--color-ash-gray` | Muted helper text, icon strokes, disabled states — readable but recessive |
-| Warm Gray | `#78716c` | `--color-warm-gray` | Body text, nav links, secondary copy — warm-tinted neutral that softens body type |
-| Ink Black | `#0c0a09` | `--color-ink-black` | Primary headings, emphasized body, strong icons — near-black with a warm cast |
-| Soot | `#1c1917` | `--color-soot` | Dark surface backgrounds for inverted sections, dark dashboard tabs |
-| Sky Wash | `#c1e1f7` | `--color-sky-wash` | Soft highlight wash behind highlighted text spans, decorative blue tint |
-| Cyan Signal | `#3ba6f1` | `--color-cyan-signal` | Primary CTA fill, active links, brand icon strokes — the only chromatic voice on the page, used sparingly to make actions feel switched on |
-| Cyan Edge | `#3398e1` | `--color-cyan-edge` | Blue accent for outlined action borders, linked labels, and lightweight interactive emphasis. Do not promote it to the primary CTA color |
+| Neon Glow | `#34d59a` | `--color-neon-glow` | Key brand accent, active state indicators, data visualizations — injects a vibrant, code-like energy. |
+| Neon Muted | `#285d49` | `--color-neon-muted` | Subtle background tones in visualizations, less prominent brand elements. |
+| Scanline Fade | `linear-gradient(90deg, rgba(57, 165, 125, 0.6) 50%, rgba(0, 0, 0, 0) 50%)` | `--color-scanline-fade` | Special effect for highlighting code or UI elements, mimicking a terminal scanline. |
+| System Warning | `#ff3621` | `--color-system-warning` | Used sparingly for icons or highlights requiring urgent attention. |
+| Whiteout | `#ffffff` | `--color-whiteout` | Primary text, primary CTA button backgrounds, icons. |
+| Ash | `#797d86` | `--color-ash` | Secondary text, descriptive copy, inactive navigation links. |
+| Pewter | `#94979` | `--color-pewter` | Tertiary text, metadata, placeholder text. |
+| Cloud | `#c9cbcf` | `--color-cloud` | Hover states on dark elements, subtle highlights. |
+| Graphite Light | `#303236` | `--color-graphite-light` | Borders, dividers, subtle UI structure. |
+| Graphite | `#242628` | `--color-graphite` | Secondary surfaces floating on the background. |
+| Graphite Deep | `#151617` | `--color-graphite-deep` | Card backgrounds, code block surfaces. |
+| Depth | `#0a0a0b` | `--color-depth` | The darkest surface color before pure black, for subtle elevation. |
+| Blackout | `#000000` | `--color-blackout` | The absolute page background. |
 
 ## Tokens — Typography
 
-### Roobert — Display and heading typeface — custom geometric sans with tight negative tracking (-0.025em at 32px, -0.021em at 52px). Weight 400 at 52px is the signature: anti-convention whisper-weight that creates authority through restraint. Headlines occupy their space without shouting. · `--font-roobert`
-- **Substitute:** Inter Tight or Satoshi
-- **Weights:** 400, 500
-- **Sizes:** 18px, 20px, 32px, 52px
-- **Line height:** 1.12, 1.22, 1.25, 1.69
-- **Letter spacing:** -0.025em at 32px, -0.021em at 52px, -0.017em at 18px
-- **Role:** Display and heading typeface — custom geometric sans with tight negative tracking (-0.025em at 32px, -0.021em at 52px). Weight 400 at 52px is the signature: anti-convention whisper-weight that creates authority through restraint. Headlines occupy their space without shouting.
-
-### Inter — Body, nav, UI, and caption typeface — neutral workhorse for all non-display copy. 14px weight 400 at 1.64 line-height is the dominant body size (freq 1174). Positive tracking (0.004em) at small sizes keeps dense UI legible. · `--font-inter`
+### Inter — Headlines and primary marketing copy. Its clean, neutral geometry provides high readability, contrasting with the more stylized monospaced font. · `--font-inter`
 - **Substitute:** Inter
+- **Weights:** 400, 500
+- **Sizes:** 10px, 12px, 13px, 14px, 15px, 16px, 18px, 20px, 24px, 28px, 32px, 40px, 44px, 48px, 60px, 80px
+- **Line height:** 1.00, 1.13, 1.25, 1.38, 1.50
+- **Letter spacing:** Tight negative tracking on all display and heading sizes (-3.2px at 80px, -1.2px at 48px), becoming normal at body copy sizes.
+- **Role:** Headlines and primary marketing copy. Its clean, neutral geometry provides high readability, contrasting with the more stylized monospaced font.
+
+### GeistMono — Code snippets, UI labels, and data displays. Its monospaced form adds a technical, typewriter-like precision, reinforcing the developer-centric identity. · `--font-geistmono`
+- **Substitute:** Fira Code, Source Code Pro
 - **Weights:** 400, 500, 600
-- **Sizes:** 10px, 12px, 13px, 14px, 15px, 16px, 18px
-- **Line height:** 1.33, 1.53, 1.64, 1.69, 2.3
-- **Letter spacing:** 0.0030em, 0.0040em, 0.0250em
-- **Role:** Body, nav, UI, and caption typeface — neutral workhorse for all non-display copy. 14px weight 400 at 1.64 line-height is the dominant body size (freq 1174). Positive tracking (0.004em) at small sizes keeps dense UI legible.
+- **Sizes:** 12px, 14px, 16px, 18px, 20px
+- **Line height:** 1.00, 1.13, 1.38, 1.50, 1.65
+- **Letter spacing:** Slight negative tracking enhances density in UI contexts (-0.7px at 14px, -0.43px at 16px).
+- **Role:** Code snippets, UI labels, and data displays. Its monospaced form adds a technical, typewriter-like precision, reinforcing the developer-centric identity.
 
 ### Type Scale
 
-| Role | Size | Line Height | Letter Spacing | Token |
-|------|------|-------------|----------------|-------|
-| caption | 10px | 2.3 | — | `--text-caption` |
-| body-lg | 16px | 1.69 | 0.048px | `--text-body-lg` |
-| subheading | 20px | 1.2 | -0.1px | `--text-subheading` |
-| heading-sm | 32px | 1.25 | -0.8px | `--text-heading-sm` |
-| display | 52px | 1.12 | -1.092px | `--text-display` |
+| Role | Family | Weight | Size | Line Height | Letter Spacing | Token |
+|------|--------|--------|------|-------------|----------------|-------|
+| caption | — | — | 12px | 1.5 | -0.7px | `--text-caption` |
+| body-sm | — | — | 14px | 1.5 | -0.7px | `--text-body-sm` |
+| body | — | — | 16px | 1.5 | -0.43px | `--text-body` |
+| subheading | — | — | 18px | 1.38 | -0.36px | `--text-subheading` |
+| heading-sm | — | — | 24px | 1.25 | -0.24px | `--text-heading-sm` |
+| heading | — | — | 32px | 1.25 | -0.64px | `--text-heading` |
+| heading-lg | — | — | 48px | 1.13 | -1.2px | `--text-heading-lg` |
+| display | — | — | 80px | 1 | -3.2px | `--text-display` |
 
 ## Tokens — Spacing & Shapes
 
 **Base unit:** 4px
 
-**Density:** compact
+**Density:** comfortable
 
 ### Spacing Scale
 
@@ -63,188 +70,131 @@ Seline sits on a warm-stone canvas (#fafaf9) with a single vivid cyan as its onl
 | 8 | 8px | `--spacing-8` |
 | 12 | 12px | `--spacing-12` |
 | 16 | 16px | `--spacing-16` |
+| 20 | 20px | `--spacing-20` |
 | 24 | 24px | `--spacing-24` |
+| 28 | 28px | `--spacing-28` |
 | 32 | 32px | `--spacing-32` |
+| 36 | 36px | `--spacing-36` |
 | 40 | 40px | `--spacing-40` |
-| 48 | 48px | `--spacing-48` |
+| 56 | 56px | `--spacing-56` |
 | 64 | 64px | `--spacing-64` |
 | 80 | 80px | `--spacing-80` |
-| 96 | 96px | `--spacing-96` |
+| 128 | 128px | `--spacing-128` |
 | 160 | 160px | `--spacing-160` |
+| 240 | 240px | `--spacing-240` |
 
 ### Border Radius
 
 | Element | Value |
 |---------|-------|
-| tags | 9999px |
-| cards | 10px |
-| icons | 4px |
-| inputs | 6px |
+| cards | 4px |
+| inputs | 4px |
 | buttons | 9999px |
-| feature-card | 16px |
+| containers | 4px |
 
 ### Shadows
 
 | Name | Value | Token |
 |------|-------|-------|
-| md | `rgba(0, 0, 0, 0.05) 0px 4px 16px 0px` | `--shadow-md` |
-| sm | `rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.1) 0...` | `--shadow-sm` |
-| subtle | `rgba(0, 0, 0, 0.05) 0px 1px 2px 0px` | `--shadow-subtle` |
-| xl | `rgba(17, 12, 46, 0.12) 0px 12px 45px 0px` | `--shadow-xl` |
+| lg | `rgba(0, 0, 0, 0.4) 0px 8px 20px 0px` | `--shadow-lg` |
 
 ### Layout
 
 - **Page max-width:** 1200px
-- **Section gap:** 96px
+- **Section gap:** 96-128px
 - **Card padding:** 24px
-- **Element gap:** 8px
+- **Element gap:** 8-16px
 
 ## Components
 
-### Primary CTA Button (filled cyan)
-**Role:** Highest-priority conversion action — 'Start free trial', primary sign-ups
+### Primary Pill Button
+**Role:** The main call-to-action, e.g., 'Get started', 'Sign up'.
 
-Pill shape (9999px radius), fill #3ba6f1, 1px border #3398e1, white text (#ffffff) weight 500, padding 8px 16px. The only chromatic filled element on the page — use once per viewport maximum.
+A pill-shaped button with a Whiteout (#ffffff) background and Graphite Deep (#151617) text. Uses Inter font. Padding is H: 28px, V: 12px. Radius is 9999px.
 
-### Secondary Ghost Button
-**Role:** Lower-priority action beside primary — 'View live demo', secondary navigation
+### Ghost Pill Button
+**Role:** Secondary actions, e.g., 'Read the docs', 'Log in'.
 
-Pill shape (9999px radius), transparent fill, 1px border #e8e6e5, text #0c0a09 weight 400, padding 8px 16px. Quiet companion to the cyan CTA.
+A pill-shaped button with a transparent background, Whiteout (#ffffff) text, and a 1px solid border in Graphite Light (#303236). Uses Inter font. Padding is H: 18px, V: 12px. Radius is 9999px.
+
+### Feature List Item
+**Role:** Bulleted items in feature sections.
+
+Whiteout (#ffffff) text using Inter. Preceded by a small dot or icon colored with Neon Glow (#34d59a).
 
 ### Navigation Link
-**Role:** Top-nav menu items — Pricing, About us, Platform, Resources
+**Role:** Links in the main site header.
 
-No fill, no border, 14px Inter weight 400, color #78716c, padding 0 12px, height 32px. Hovers to #0c0a09. Dropdown caret inline at end.
+Text in Ash (#797d86) using Inter font. On hover or active state, text becomes Whiteout (#ffffff).
 
-### Signed-in Avatar Link
-**Role:** Top-nav social proof cluster — stack of 4 overlapping circular avatars
+### Tag Badge
+**Role:** Small informational tags, like 'A DATABRICKS COMPANY'.
 
-24px circles with 2px ring offset, -8px overlap spacing. Sits inline between nav items as proof-of-community. Avatars are real photos, no border.
+Small, all-caps text using GeistMono in Ash (#797d86) or a similar gray. Often preceded by a Neon Glow (#34d59a) icon or symbol.
 
-### Flat Content Card
-**Role:** Feature blocks, dashboard previews, testimonial cards
+### Announcement Bar
+**Role:** A persistent top bar for site-wide announcements.
 
-White (#ffffff) fill, 10px radius, 1px border #e8e6e5 (not shadow-dependent), 24px padding. Subtle shadow rgba(0,0,0,0.05) 0px 4px 16px 0px adds lift without weight. The border IS the structure.
+Full-width bar with a Blackout (#000000) background. Text uses Inter font in a legible color like Whiteout (#ffffff) or Neon Glow (#34d59a).
 
-### Floating Dashboard Preview
-**Role:** Hero product screenshot — the dashboard mockup
+### Logo Bar
+**Role:** A section displaying logos of partner or client companies.
 
-16px radius, white fill, shadow rgba(17,12,46,0.12) 0px 12px 45px 0px — the one card allowed to feel elevated/3D. 8px padding internally so the dashboard UI sits within a frame. Grayscale(1) contrast(0.94) filter applied for muted product photography feel.
-
-### Highlighted Text Span
-**Role:** Inline emphasis within headlines — 'simple & actionable', 'saves us time'
-
-Text in #3398e1 with a soft #c1e1f7 background highlight (pill-shaped background behind the word). Weight 400. The only inline color treatment — every headline gets one.
-
-### Text Input
-**Role:** Newsletter signup, form fields
-
-White fill, 6px radius, 1px border #d6d3d1, placeholder #78716c, padding 4px 12px. Focus ring: 2px #3ba6f1. Minimal, inline with label.
-
-### Mascot Sticker Illustration
-**Role:** Brand personality element — the hooded character peeking from behind cards
-
-Grayscale illustration with drop-shadow filter (rgba(0,0,0,0.25) 0px 2px 4px). SVG outline-only treatment. Used once per section as a playful counterweight to the monochrome data UI.
-
-### Logo Wordmark
-**Role:** Top-left brand identifier
-
-Small black flame/spark glyph + 'Seline' wordmark in Inter weight 500, 14px, #0c0a09. Compact, sits left of nav.
-
-### Star Rating Display
-**Role:** Trust signal above testimonials — '★★★★★ on G2'
-
-Five small star glyphs in #0c0a09 (or warm gray), inline with platform name in 14px Inter #78716c. No card chrome — sits inline in copy flow.
-
-### Testimonial Card
-**Role:** Customer quote with attribution
-
-No card chrome. Star row (★ in #0c0a09), 16px quote text in #0c0a09 with inline cyan highlights for emphasized phrases, 32px avatar circle + name (14px weight 500) + role (14px #78716c). Vertical gap 16px between elements.
-
-### Tab Pill Group
-**Role:** Feature navigation — Dashboard / Visitors / Journeys / Funnels
-
-Horizontal row of 4 pill-shaped tabs at bottom of dashboard preview. Active tab: #1c1917 fill, white text, 9999px radius. Inactive: transparent, #0c0a09 text, 1px #e8e6e5 border. Switches the dashboard view above.
+A row of logos rendered in a monochrome Ash (#797d86) or Pewter (#94979e) color on a Blackout (#000000) background.
 
 ## Do's and Don'ts
 
 ### Do
-- Use Roobert at weight 400 for all display and heading sizes — never bump to 600/700 for emphasis, rely on size and the cyan highlight span instead
-- Use #fafaf9 as the page background and #ffffff only for card surfaces — never invert this (white on canvas, not the other way around)
-- Apply exactly one cyan highlight span (#3398e1 text + #c1e1f7 pill background) per headline to mark the value proposition keyword
-- Use 1px #e8e6e5 borders as the primary structural separator inside cards — reserve shadows for product-preview cards only
-- Keep buttons pill-shaped (9999px radius) with 8px 16px padding — the cyan filled CTA must be the only chromatic filled element on any screen
-- Set body copy at 14px Inter weight 400 with 1.64 line-height — this is the dominant UI rhythm, do not break it
-- Let the mascot sticker appear once per section as a personality beat — do not repeat or animate it
+- Use pure Blackout (#000000) for all main section backgrounds.
+- Reserve Neon Glow (#34d59a) for interactive highlights, data visualizations, and small decorative accents only.
+- Employ the Whiteout (#ffffff) pill button for all primary calls-to-action.
+- Use GeistMono for all code snippets, terminal simulations, and compact UI labels.
+- Apply tight negative letter-spacing (-1.2px or more) to all headlines 48px and larger.
+- Achieve depth by layering near-black surfaces (e.g., #151617 on #000000), not with box-shadows.
+- Maintain a strict dichotomy of shapes: 9999px radius for buttons, 4px for all other containers.
 
 ### Don't
-- Do not introduce new accent colors — the entire palette is stone neutrals plus one cyan; adding green, purple, or red breaks the editorial restraint
-- Do not use heavy drop shadows on content cards — the 16px-blur floating preview shadow is reserved for exactly one element per page
-- Do not set headlines in Inter — Roobert at the 32px/52px sizes is the brand voice; mixing fonts breaks hierarchy
-- Do not use #ffffff as the page background — always #fafaf9; pure white belongs only on elevated card surfaces
-- Do not fill buttons with dark/neutral colors for primary actions — the cyan #3ba6f1 is the only correct filled-button color
-- Do not add gradients, glassmorphism, or decorative color washes — the design is deliberately flat and paper-textured
-- Do not stack multiple cyan highlight spans in one headline — one per headline maximum, the restraint is the point
-
-## Surfaces
-
-| Level | Name | Value | Purpose |
-|-------|------|-------|---------|
-| 0 | Canvas | `#fafaf9` | Full-page warm-stone background |
-| 1 | Card | `#ffffff` | Flat content cards, nav, input fills — sits one elevation step above canvas |
-| 2 | Floating Preview | `#ffffff` | Hero dashboard screenshot — only surface allowed the deep 45px-blur shadow |
-| 3 | Inverted Section | `#1c1917` | Dark accent surfaces for tab pills or inverted panels (sparingly used) |
+- Don't use gradients or background colors on main page sections.
+- Don't use traditional box-shadows for elevation.
+- Don't use Neon Glow (#34d59a) for body copy or headlines.
+- Don't use saturated colors other than the primary brand green and the occasional red alert accent.
+- Don't mix Inter and GeistMono within the same sentence or headline.
+- Don't use rounded corners larger than 4px on cards, code blocks, or input fields.
+- Don't create buttons that aren't pill-shaped.
 
 ## Elevation
 
-- **Content card:** `rgba(0, 0, 0, 0.05) 0px 4px 16px 0px`
-- **Floating dashboard preview:** `rgba(17, 12, 46, 0.12) 0px 12px 45px 0px`
-- **Small icon / decorative chip:** `rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.1) 0px 2px 4px -2px`
-- **Nav / button hairline:** `rgba(0, 0, 0, 0.05) 0px 1px 2px 0px`
+Elevation is achieved through layered, near-black surfaces, not traditional box-shadows. Surfaces like Graphite Deep (#151617) float on the pure Blackout (#000000) background, creating depth through contrast without relying on blurs. This reinforces a flat, digital-native aesthetic.
 
 ## Imagery
 
-Visual language is dominated by product UI screenshots — the dashboard preview is treated as photography, rendered with a grayscale(1) contrast(0.94) filter that mutes the data colors to monochrome. The only human figure is a line-art mascot sticker (hooded character) drawn in outline-only SVG style, placed once per section as a playful counterweight to the analytical content, with a soft drop-shadow for sticker-like depth. Logo and brand glyphs are small black spark/flame marks. Photography is absent — no lifestyle, no team shots, no environment imagery. The object (the dashboard) IS the hero. All decorative icons are 1px-stroke outline style in either #0c0a09 or #3ba6f1, never filled.
+Visuals are exclusively abstract, generative graphics resembling data streams, server activity, or glitch art. Composed of thin vertical lines in Neon Glow (#34d59a) and other muted tones, they serve as atmospheric backdrops rather than informational content. Product visuals are limited to stylized screenshots of terminal windows and code blocks, treated as UI components. Photography and traditional illustrations are absent. This text-and-abstract-graphic approach creates a purely digital, code-native environment.
 
 ## Layout
 
-Page is max-width centered at ~1200px with generous vertical breathing room. Hero is a two-row text block left-aligned with a single highlighted phrase ('simple & actionable') in cyan, followed by a dual-CTA row (cyan pill + ghost pill), then a row of grayscale partner logos, then a star-rating trust line, then a full-width floating dashboard preview that overlaps slightly into the next section. Below the fold: alternating single-column testimonial rows in a 2-column grid, then full-width feature sections with left-aligned text and centered product visuals. Navigation is a minimal top bar — logo left, centered nav links, sign-in + cyan CTA right — with a floating avatar cluster mid-nav as social proof. Section gaps are wide (96px) to create editorial pacing rather than dense information stacking.
+The page structure is full-bleed black, creating an immersive, infinite canvas. A centered headline over an abstract data-viz graphic defines the hero. Below the hero, content is organized within a centered max-width container (approx. 1200px), creating focus. Sections flow seamlessly into one another without visual dividers, relying on generous vertical spacing (96-128px) to create rhythm. Content is arranged in simple, symmetrical layouts: centered stacks for headlines, two-column grids for feature lists, and multi-column grids for logos. A sticky header provides persistent navigation.
 
 ## Agent Prompt Guide
 
-Quick Color Reference:
-- page background: #fafaf9
-- card surface: #ffffff
-- primary text: #0c0a09
-- secondary text: #78716c
-- border / hairline: #e8e6e5
-- accent (text highlight + icons): #3ba6f1
-- primary action: #3ba6f1 (filled action)
-- highlight wash: #c1e1f7
+### Quick Color Reference
+- **Page Background:** Blackout (`#000000`)
+- **Primary Text:** Whiteout (`#ffffff`)
+- **Secondary Text:** Ash (`#797d86`)
+- **Accent / Highlight:** Neon Glow (`#34d59a`)
+- **CTA Button:** Whiteout (`#ffffff`) background, Graphite Deep (`#151617`) text
+- **Border / Divider:** Graphite Light (`#303236`)
 
-Example Component Prompts:
-
-1. Hero headline: 52px roobert weight 400, #0c0a09, line-height 1.12, letter-spacing -1.092px. Inline the phrase 'simple & actionable' as a span with #3398e1 text on a #c1e1f7 pill background highlight. Subheadline at 16px Inter weight 400, #78716c, line-height 1.69.
-
-2. Create a Primary Action Button: #3ba6f1 background, #0c0a09 text, 9999px radius, compact pill padding. Use this filled treatment for the main CTA.
-
-3. Feature card: white (#ffffff) fill, 10px radius, 1px border #e8e6e5, 24px padding, shadow rgba(0,0,0,0.05) 0px 4px 16px 0px. Heading 32px roobert weight 400 #0c0a09, body 14px Inter #78716c.
-
-4. Dashboard preview card: white fill, 16px radius, shadow rgba(17,12,46,0.12) 0px 12px 45px 0px, 8px internal padding. Apply CSS filter grayscale(1) contrast(0.94) to mute the dashboard to monochrome.
-
-5. Testimonial block: star row of 5 small ★ glyphs in #0c0a09, quote text 16px Inter #0c0a09 line-height 1.69 with inline cyan highlight span on the emphasized phrase, 32px circular avatar below with name 14px Inter weight 500 #0c0a09 and role 14px Inter #78716c. No card chrome — copy flows directly on canvas.
-
-## Highlight Span Pattern
-
-The signature typographic move is the inline highlight: one phrase per headline receives #3398e1 text color with a #c1e1f7 pill-shaped background behind it (padding ~2px 8px, radius 4px). This is the brand's voice marker — it always lands on the value-prop keyword. Rules: exactly one per headline, never inside body paragraphs, never on nav items. The highlight carries the entire chromatic budget of the headline; everything else stays #0c0a09.
+### Example Component Prompts
+1.  **Hero Section:** "Create a full-screen hero section with a `Blackout` #000000 background. Add a large display headline: text 'Fast Postgres Databases', font `Inter` 80px weight 500, color `Whiteout` #ffffff, line-height 1.0, and letter-spacing -3.2px. Below it, add a primary CTA button: 'Get started' in a `Whiteout` #ffffff pill with `Graphite Deep` #151617 text, 9999px radius, and 12px 28px padding."
+2.  **Code Block:** "Design a terminal code block component. Use a `Graphite Deep` #151617 background with 4px rounded corners and 24px padding. The text inside should use the `GeistMono` font at 14px. Default text color is `Whiteout` #ffffff. Highlight specific keywords or outputs with `Neon Glow` #34d59a."
+3.  **Feature Section:** "Create a two-column section on a `Blackout` #000000 background. In the left column, create a list of features with `Whiteout` #ffffff text and a `Neon Glow` #34d59a dot prefix. In the right column, add a heading 'Integrate with a single command' using `Inter` 48px, `Whiteout` #ffffff color, and -1.2px letter-spacing."
 
 ## Similar Brands
 
-- **Plausible Analytics** — Same single-accent-on-warm-canvas approach with privacy-focused analytics positioning; both use one vivid color against an almost-monochrome palette
-- **Linear** — Same weight-400-at-large-size headline restraint and tight negative letter-spacing on a custom geometric sans
-- **Fathom Analytics** — Same minimal analytics-alternative visual language with warm-neutral canvas and one accent color, editorial vertical rhythm
-- **Vercel** — Same restrained monochrome palette with a single chromatic accent and pill-shaped interactive controls
-- **Cal.com** — Same warm-stone canvas with cyan accent, mascot sticker personality element, and flat product-screenshot hero
+- **Vercel** — Identical developer focus with a black/white monochrome palette, single accent color, and use of Inter font.
+- **Linear** — Shares a pristine, high-contrast dark UI, minimalist aesthetic, and sharp focus on typography.
+- **GitHub** — Similar dark-mode theming, developer-centric tooling aesthetic, and heavy reliance on monospaced fonts for identity.
+- **Replit** — Also uses a dark, code-focused environment with vibrant color accents to appeal to a developer audience.
 
 ## Quick Start
 
@@ -253,37 +203,50 @@ The signature typographic move is the inline highlight: one phrase per headline 
 ```css
 :root {
   /* Colors */
-  --color-stone-canvas: #fafaf9;
-  --color-pure-white: #ffffff;
-  --color-stone-border: #e8e6e5;
-  --color-stone-muted: #d6d3d1;
-  --color-ash-gray: #a8a29e;
-  --color-warm-gray: #78716c;
-  --color-ink-black: #0c0a09;
-  --color-soot: #1c1917;
-  --color-sky-wash: #c1e1f7;
-  --color-cyan-signal: #3ba6f1;
-  --color-cyan-edge: #3398e1;
+  --color-neon-glow: #34d59a;
+  --color-neon-muted: #285d49;
+  --color-scanline-fade: #39a57d;
+  --gradient-scanline-fade: linear-gradient(90deg, rgba(57, 165, 125, 0.6) 50%, rgba(0, 0, 0, 0) 50%);
+  --color-system-warning: #ff3621;
+  --color-whiteout: #ffffff;
+  --color-ash: #797d86;
+  --color-pewter: #94979;
+  --color-cloud: #c9cbcf;
+  --color-graphite-light: #303236;
+  --color-graphite: #242628;
+  --color-graphite-deep: #151617;
+  --color-depth: #0a0a0b;
+  --color-blackout: #000000;
 
   /* Typography — Font Families */
-  --font-roobert: 'Roobert', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-inter: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-geistmono: 'GeistMono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   /* Typography — Scale */
-  --text-caption: 10px;
-  --leading-caption: 2.3;
-  --text-body-lg: 16px;
-  --leading-body-lg: 1.69;
-  --tracking-body-lg: 0.048px;
-  --text-subheading: 20px;
-  --leading-subheading: 1.2;
-  --tracking-subheading: -0.1px;
-  --text-heading-sm: 32px;
+  --text-caption: 12px;
+  --leading-caption: 1.5;
+  --tracking-caption: -0.7px;
+  --text-body-sm: 14px;
+  --leading-body-sm: 1.5;
+  --tracking-body-sm: -0.7px;
+  --text-body: 16px;
+  --leading-body: 1.5;
+  --tracking-body: -0.43px;
+  --text-subheading: 18px;
+  --leading-subheading: 1.38;
+  --tracking-subheading: -0.36px;
+  --text-heading-sm: 24px;
   --leading-heading-sm: 1.25;
-  --tracking-heading-sm: -0.8px;
-  --text-display: 52px;
-  --leading-display: 1.12;
-  --tracking-display: -1.092px;
+  --tracking-heading-sm: -0.24px;
+  --text-heading: 32px;
+  --leading-heading: 1.25;
+  --tracking-heading: -0.64px;
+  --text-heading-lg: 48px;
+  --leading-heading-lg: 1.13;
+  --tracking-heading-lg: -1.2px;
+  --text-display: 80px;
+  --leading-display: 1;
+  --tracking-display: -3.2px;
 
   /* Typography — Weights */
   --font-weight-regular: 400;
@@ -296,46 +259,36 @@ The signature typographic move is the inline highlight: one phrase per headline 
   --spacing-8: 8px;
   --spacing-12: 12px;
   --spacing-16: 16px;
+  --spacing-20: 20px;
   --spacing-24: 24px;
+  --spacing-28: 28px;
   --spacing-32: 32px;
+  --spacing-36: 36px;
   --spacing-40: 40px;
-  --spacing-48: 48px;
+  --spacing-56: 56px;
   --spacing-64: 64px;
   --spacing-80: 80px;
-  --spacing-96: 96px;
+  --spacing-128: 128px;
   --spacing-160: 160px;
+  --spacing-240: 240px;
 
   /* Layout */
   --page-max-width: 1200px;
-  --section-gap: 96px;
+  --section-gap: 96-128px;
   --card-padding: 24px;
-  --element-gap: 8px;
+  --element-gap: 8-16px;
 
   /* Border Radius */
   --radius-md: 4px;
-  --radius-lg: 10px;
-  --radius-2xl: 16px;
-  --radius-full: 9999px;
 
   /* Named Radii */
-  --radius-tags: 9999px;
-  --radius-cards: 10px;
-  --radius-icons: 4px;
-  --radius-inputs: 6px;
+  --radius-cards: 4px;
+  --radius-inputs: 4px;
   --radius-buttons: 9999px;
-  --radius-feature-card: 16px;
+  --radius-containers: 4px;
 
   /* Shadows */
-  --shadow-md: rgba(0, 0, 0, 0.05) 0px 4px 16px 0px;
-  --shadow-sm: rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.1) 0px 2px 4px -2px;
-  --shadow-subtle: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
-  --shadow-xl: rgba(17, 12, 46, 0.12) 0px 12px 45px 0px;
-
-  /* Surfaces */
-  --surface-canvas: #fafaf9;
-  --surface-card: #ffffff;
-  --surface-floating-preview: #ffffff;
-  --surface-inverted-section: #1c1917;
+  --shadow-lg: rgba(0, 0, 0, 0.4) 0px 8px 20px 0px;
 }
 ```
 
@@ -344,62 +297,72 @@ The signature typographic move is the inline highlight: one phrase per headline 
 ```css
 @theme {
   /* Colors */
-  --color-stone-canvas: #fafaf9;
-  --color-pure-white: #ffffff;
-  --color-stone-border: #e8e6e5;
-  --color-stone-muted: #d6d3d1;
-  --color-ash-gray: #a8a29e;
-  --color-warm-gray: #78716c;
-  --color-ink-black: #0c0a09;
-  --color-soot: #1c1917;
-  --color-sky-wash: #c1e1f7;
-  --color-cyan-signal: #3ba6f1;
-  --color-cyan-edge: #3398e1;
+  --color-neon-glow: #34d59a;
+  --color-neon-muted: #285d49;
+  --color-scanline-fade: #39a57d;
+  --color-system-warning: #ff3621;
+  --color-whiteout: #ffffff;
+  --color-ash: #797d86;
+  --color-pewter: #94979;
+  --color-cloud: #c9cbcf;
+  --color-graphite-light: #303236;
+  --color-graphite: #242628;
+  --color-graphite-deep: #151617;
+  --color-depth: #0a0a0b;
+  --color-blackout: #000000;
 
   /* Typography */
-  --font-roobert: 'Roobert', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-inter: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-geistmono: 'GeistMono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   /* Typography — Scale */
-  --text-caption: 10px;
-  --leading-caption: 2.3;
-  --text-body-lg: 16px;
-  --leading-body-lg: 1.69;
-  --tracking-body-lg: 0.048px;
-  --text-subheading: 20px;
-  --leading-subheading: 1.2;
-  --tracking-subheading: -0.1px;
-  --text-heading-sm: 32px;
+  --text-caption: 12px;
+  --leading-caption: 1.5;
+  --tracking-caption: -0.7px;
+  --text-body-sm: 14px;
+  --leading-body-sm: 1.5;
+  --tracking-body-sm: -0.7px;
+  --text-body: 16px;
+  --leading-body: 1.5;
+  --tracking-body: -0.43px;
+  --text-subheading: 18px;
+  --leading-subheading: 1.38;
+  --tracking-subheading: -0.36px;
+  --text-heading-sm: 24px;
   --leading-heading-sm: 1.25;
-  --tracking-heading-sm: -0.8px;
-  --text-display: 52px;
-  --leading-display: 1.12;
-  --tracking-display: -1.092px;
+  --tracking-heading-sm: -0.24px;
+  --text-heading: 32px;
+  --leading-heading: 1.25;
+  --tracking-heading: -0.64px;
+  --text-heading-lg: 48px;
+  --leading-heading-lg: 1.13;
+  --tracking-heading-lg: -1.2px;
+  --text-display: 80px;
+  --leading-display: 1;
+  --tracking-display: -3.2px;
 
   /* Spacing */
   --spacing-4: 4px;
   --spacing-8: 8px;
   --spacing-12: 12px;
   --spacing-16: 16px;
+  --spacing-20: 20px;
   --spacing-24: 24px;
+  --spacing-28: 28px;
   --spacing-32: 32px;
+  --spacing-36: 36px;
   --spacing-40: 40px;
-  --spacing-48: 48px;
+  --spacing-56: 56px;
   --spacing-64: 64px;
   --spacing-80: 80px;
-  --spacing-96: 96px;
+  --spacing-128: 128px;
   --spacing-160: 160px;
+  --spacing-240: 240px;
 
   /* Border Radius */
   --radius-md: 4px;
-  --radius-lg: 10px;
-  --radius-2xl: 16px;
-  --radius-full: 9999px;
 
   /* Shadows */
-  --shadow-md: rgba(0, 0, 0, 0.05) 0px 4px 16px 0px;
-  --shadow-sm: rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.1) 0px 2px 4px -2px;
-  --shadow-subtle: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
-  --shadow-xl: rgba(17, 12, 46, 0.12) 0px 12px 45px 0px;
+  --shadow-lg: rgba(0, 0, 0, 0.4) 0px 8px 20px 0px;
 }
 ```

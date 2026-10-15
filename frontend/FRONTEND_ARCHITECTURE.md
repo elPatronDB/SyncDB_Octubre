@@ -1,237 +1,97 @@
-# Frontend Architecture — Web Admin System
+# Frontend Architecture — SyncDB Master Console
 
-## 1. Purpose
+## 1. Propósito y Principios
 
-This document defines the frontend architecture, folder structure, naming conventions, routing strategy, authentication flow, API communication rules, and form implementation standards for the **Web Admin System**.
+Este documento define la arquitectura, organización de directorios, estándares de diseño visual y convenciones de desarrollo de la interfaz de usuario de **SyncDB**.
 
-The project follows **Clean Architecture** principles with a strong separation between:
-* **Global Core** (API, State Store, Theme, Utils)
-* **Domain definitions & DTOs**
-* **API services & infrastructure**
-* **Module-specific presentation** (Components, Pages, Routing)
-* **Shared reusable UI** (Tables, Dialogs, Loaders, Layouts)
+El proyecto sigue los principios de **Clean Architecture** aplicados al frontend:
+* **Desacoplamiento:** Las capas de presentación desconocen detalles de red; interactúan mediante servicios de infraestructura y stores de estado.
+* **Single-User Workspace:** El usuario autenticado es el propietario de su consola master. No existen matrices ni jerarquías de permisos RBAC ni microservicios de OTP en el cliente.
+* **Sistema de Diseño Neon:** Interfaz en modo oscuro estricto (`#000000`), superficies contrastadas (`#151617`), acentos verde neón terminal (`#34d59a`) y dicotomía de formas (botones píldora `9999px` y contenedores afilados `4px`).
 
 ---
 
-## 2. Directory Structure
+## 2. Estructura de Carpetas (Schema del Frontend)
 
 ```text
 frontend/src/
 ├── core/
 │   ├── api/
-│   │   ├── axios.instance.ts
-│   │   ├── config.ts
+│   │   ├── axios.instance.ts          # Cliente Axios central con inyección Bearer y auto-refresh en 401
+│   │   ├── config.ts                  # URLs y endpoints de configuración
 │   │   └── index.ts
 │   ├── store/
-│   │   └── authStore.ts
+│   │   └── authStore.ts               # Estado global Zustand (accessToken, user en memoria, restauración de sesión)
 │   ├── theme/
-│   │   ├── index.ts
-│   │   ├── palette.ts
-│   │   └── typography.ts
+│   │   ├── index.ts                   # Exportación del tema MUI
+│   │   ├── palette.ts                 # Tokens cromáticos Neon (Blackout, Neon Glow, Graphite Deep)
+│   │   ├── typography.ts              # Escala tipográfica Inter y Geist Mono con tracking negativo
+│   │   └── theme.ts                   # Personalización de componentes Material UI (MuiButton, MuiCard, etc.)
 │   └── utils/
-│       ├── formatters.ts
-│       └── permissions.ts
+│       ├── formatDate.ts              # Formateadores de fecha y hora local
+│       ├── formatMoney.ts             # Formateadores numéricos y de moneda
+│       └── index.ts
 │
 ├── modules/
-│   ├── auth/
-│   │   ├── domain/
-│   │   ├── infrastructure/
-│   │   └── presentation/
-│   ├── users/
-│   │   ├── domain/
-│   │   ├── infrastructure/
-│   │   └── presentation/
-│   ├── roles/
-│   │   ├── domain/
-│   │   ├── infrastructure/
-│   │   └── presentation/
-│   ├── audit/
-│   │   ├── domain/
-│   │   ├── infrastructure/
-│   │   └── presentation/
-│   ├── profile/
-│   │   └── presentation/
-│   └── websites/
-│       ├── domain/
-│       │   └── dto/
-│       │       ├── websites.dto.ts
-│       │       ├── content-types.dto.ts
-│       │       ├── email-templates.dto.ts
-│       │       └── forms.dto.ts
-│       ├── infrastructure/
-│       │   ├── schemas/
-│       │   │   ├── website.schema.ts
-│       │   │   ├── content-type.schema.ts
-│       │   │   ├── content-field.schema.ts
-│       │   │   ├── email-template.schema.ts
-│       │   │   ├── form.schema.ts
-│       │   │   └── form-field.schema.ts
-│       │   └── services/
-│       │       ├── websites.service.ts
-│       │       ├── content-types.service.ts
-│       │       ├── email-templates.service.ts
-│       │       └── forms.service.ts
-│       └── presentation/
-│           ├── components/
-│           │   ├── WebsiteFormDialog.tsx
-│           │   ├── ContentTypeFormDialog.tsx
-│           │   ├── ContentFieldFormDialog.tsx
-│           │   ├── ContentTypesTab.tsx
-│           │   ├── EmailTemplatesTab.tsx
-│           │   ├── EmailTemplateFormDialog.tsx
-│           │   ├── EmailTemplatePreview.tsx
-│           │   ├── EmailTemplatePreviewDialog.tsx
-│           │   ├── FormsTab.tsx
-│           │   ├── FormFormDialog.tsx
-│           │   ├── FormFieldFormDialog.tsx
-│           │   ├── FormSubmissionDetailDialog.tsx
-│           │   └── PublicFormApiDocDialog.tsx
-│           ├── pages/
-│           │   ├── WebsitesList.page.tsx
-│           │   ├── WebsiteDetail.page.tsx
-│           │   ├── ContentTypeDetail.page.tsx
-│           │   └── FormDetail.page.tsx
-│           ├── websites.lazy.ts
-│           └── websites.routes.tsx
+│   ├── auth/                          # Flujos de Autenticación (Login, Sesión)
+│   │   ├── domain/                    # Entidades (AuthUser, AuthTokens) y esquemas Zod de validación
+│   │   ├── infrastructure/            # Servicios HTTP (login, logout, refresh, me)
+│   │   └── presentation/              # Página de Login y componentes de formulario
+│   │
+│   └── profile/                       # Gestión de Identidad y Cuenta del Usuario
+│       ├── domain/                    # Interfaces de perfil
+│       └── presentation/              # Vista de perfil de la Consola Master
 │
 ├── presentation/
 │   ├── layouts/
-│   │   ├── blankLayout/
-│   │   │   └── BlankLayout.tsx
-│   │   └── fullLayout/
-│   │       ├── navbar/
-│   │       ├── sidebar/
-│   │       └── FullLayout.tsx
+│   │   ├── blankLayout/               # Layout minimalista para flujos públicos (Login)
+│   │   └── fullLayout/                # Layout de consola maestra con Sidebar retráctil y Navbar
+│   │       ├── navbar/                # Barra superior con estado de conexión y menú de cuenta
+│   │       └── sidebar/               # Navegación lateral con soporte para mini-colapso
 │   └── routes/
-│       ├── ProtectedRoute.tsx
-│       └── appRouter.tsx
+│       ├── ProtectedRoute.tsx         # Guardia de autenticación y auto-refresh
+│       └── appRouter.tsx              # Router React v7 con importación perezosa (lazy loading)
 │
-└── shared/
-    ├── components/
-    │   ├── RouteProtector/
-    │   ├── common/
-    │   │   ├── PageHeader.tsx
-    │   │   ├── GoogleSearchBar.tsx
-    │   │   └── WebsiteFavicon.tsx
-    │   ├── dialog/
-    │   │   └── ConfirmDialog.tsx
-    │   ├── loaders/
-    │   └── tables/
-    │       ├── ListTable.tsx
-    │       └── ListTableSimple.tsx
-    └── pages/
-        ├── AccessDenied.page.tsx
-        └── Dashboard.page.tsx
+├── shared/                            # Componentes y vistas compartidas
+│   ├── components/
+│   │   ├── common/                    # PageHeader, barras de búsqueda y encabezados
+│   │   ├── dialog/                    # ConfirmDialog genérico
+│   │   ├── loaders/                   # FullPageLoader y spinners de carga
+│   │   ├── pagination/                # Paginador reutilizable
+│   │   └── tables/                    # ListTable dinámica
+│   └── pages/
+│       └── Dashboard.page.tsx         # Tablero principal de la Consola Master
+│
+├── index.css                          # Tokens CSS Neon y Google Fonts (Inter + Geist Mono)
+└── main.tsx                           # Punto de entrada de la aplicación React con ThemeProvider
 ```
 
 ---
 
-## 3. Core Layer
+## 3. Sistema de Diseño Neon (`DESIGN.md`)
 
-### 3.1 Centralized API (`core/api`)
-Manages the Axios instance with interceptors for:
-* Injecting `Authorization: Bearer <token>` automatically on authenticated requests.
-* Intercepting HTTP 401 errors and orchestrating token refresh / logout.
+El tema visual sigue la estética **"Server Room After Dark"**:
 
-### 3.2 Global Store (`core/store/authStore.ts`)
-Zustand store managing authentication state:
-* Current user object (`id`, `email`, `firstName`, `lastName`, `roles`, `permissions`, `isVerify`).
-* Tokens (`accessToken`, `tokenExpiration`).
-* Actions: `login()`, `logout()`, `setUser()`, `setAccessToken()`.
+### 3.1 Paleta de Color
+* **Blackout (`#000000`):** Fondo absoluto del canvas de la página.
+* **Depth (`#0a0a0b`):** Fondo de campos de entrada (`TextField`), chips y barras de navegación.
+* **Graphite Deep (`#151617`):** Fondo de tarjetas (`Card`), paneles y diálogos.
+* **Graphite Light (`#303236`):** Bordes estructurales, divisores y contornos de inputs.
+* **Neon Glow (`#34d59a`):** Acento eléctrico primario para focos, estados activos y badges de estado.
+* **Whiteout (`#ffffff`):** Texto principal y relleno de botones de acción primaria (`Button variant="contained"`).
+* **Ash (`#797d86`):** Texto secundario, etiquetas descriptivas y navegación inactiva.
 
-### 3.3 Permissions Engine (`core/utils/permissions.ts`)
-UX permission helpers:
-* `hasPermission(user, permission)`: Checks if the user has a specific permission or `SUPER_ADMIN` role.
-* `hasSomePermission(user, [permissions])`: Checks if the user has any of the listed permissions.
-* `hasAllPermissions(user, [permissions])`: Checks if the user has all listed permissions.
-
----
-
-## 4. Modules Overview
-
-### 4.1 `auth`
-* **Pages**: Login, Password Reset Request, Password Reset Verify OTP, Password Reset New Password, Verify Account OTP / Activation.
-* **Standards**: OTP validation integrated directly with the backend microservice.
-
-### 4.2 `users`
-* **Pages**: UsersList with search, role badges, status switches, creation/edit modals, and logical deactivation.
-* **Forms**: Validated with Zod schemas and `zodResolver`.
-
-### 4.3 `roles`
-* **Pages**: Roles & Permissions Management with interactive Permissions Matrix Grid (`PermissionsMatrixGrid`).
-* **Features**: Dynamic module grouping (Users, Roles, Websites, Content Types, Content Fields, Forms, Form Fields, Form Submissions, Email Templates, Emails, Audit) and bulk role permission assignment.
-
-### 4.4 `audit`
-* **Pages**: Audit Logs List with filters by resource, action, user, and interactive JSON diff inspector.
-
-### 4.5 `profile`
-* **Pages**: User profile overview, assigned institutional roles, account verification status, and password change.
-
-### 4.6 `websites` (Core Domain, Headless CMS, Email Templates & Forms)
-* **Navigation Architecture**:
-  ```text
-  Websites (/websites)
-     ↓
-  Website Detail (/websites/:websiteId)
-     ├── Overview & Configuration Tab (?tab=)
-     ├── Content Types Tab (?tab=content-types)
-     │      ↓
-     │   Content Type Detail (/websites/:websiteId/content-types/:contentTypeId)
-     │      └── Content Schema Fields & Headless Items Management
-     │
-     ├── Email Templates Tab (?tab=email-templates)
-     │      └── Email Templates Management, Editor & Live Sandbox Preview
-     │
-     └── Forms Tab (?tab=forms)
-            ↓
-         Form Detail (/websites/:websiteId/forms/:formId)
-            ├── Overview Tab (?tab=overview): Email notifications, recipients & templates
-            ├── Fields Tab (?tab=fields): Form fields typed schema management
-            └── Submissions Tab (?tab=submissions): Submissions list, status & payload inspector
-  ```
-* **Pages**:
-  * `WebsitesList.page.tsx`: Full responsive list of registered websites, domains, hosting providers, active/inactive toggles, API key overview, and deletion/regeneration dialogs.
-  * `WebsiteDetail.page.tsx`: Detail view of website configuration with tabbed navigation (`Overview & Configuration`, `Content Types`, `Email Templates`, and `Forms`).
-  * `ContentTypeDetail.page.tsx`: Dedicated management view for a specific `ContentType` and its structural `ContentField` schema list.
-  * `FormDetail.page.tsx`: Detail view of a specific `Form` with tabbed navigation for `Overview`, `Fields` management, and `Submissions` history.
-* **Components**:
-  * `WebsiteFormDialog.tsx`: Dialog for creating and updating website configurations with real-time domain regex validation.
-  * `ContentTypeFormDialog.tsx`: Dialog for creating and updating ContentTypes with slug auto-generation.
-  * `ContentFieldFormDialog.tsx`: Dialog for creating and updating ContentFields with support for all 7 `FieldType` enum values (`STRING`, `TEXT`, `NUMBER`, `BOOLEAN`, `DATE`, `JSON`, `URL`).
-  * `ContentTypesTab.tsx`: Embedded panel in `WebsiteDetail` displaying ContentTypes cards grid, stats counter, quick actions, and search filtering.
-  * `EmailTemplatesTab.tsx`: Embedded panel in `WebsiteDetail` displaying all email templates, linked forms counter, search filtering, and CRUD operations.
-  * `EmailTemplateFormDialog.tsx`: Dedicated split-view and tabbed HTML email editor dialog with starter templates, snippet insertion (`{{name}}`, `{{email}}`, etc.), Tab key indent support, and real-time live preview.
-  * `EmailTemplatePreview.tsx`: Isolated, sandboxed `<iframe>` preview component with Desktop and Mobile viewport toggle.
-  * `EmailTemplatePreviewDialog.tsx`: Modal for instant full-screen/dialog preview of existing email templates.
-  * `FormsTab.tsx`: Embedded panel in `WebsiteDetail` displaying forms list, field counts, submission counts, email notification status, search, and CRUD dialogs.
-  * `FormFormDialog.tsx`: Dialog for creating and updating Forms, slug generation, email notifications toggle, dynamic recipient management (tag list), and website-scoped EmailTemplate selector.
-  * `FormFieldFormDialog.tsx`: Dialog for creating and updating FormFields with friendly type descriptions, required toggles, and key format validations.
-  * `FormSubmissionDetailDialog.tsx`: Modal for inspecting dynamic submission `data` payloads, associated `Contact` details, and updating submission statuses (`PENDING`, `PROCESSED`, `SPAM`, `FAILED`).
-  * `PublicFormApiDocDialog.tsx`: Interactive integration guide and API reference modal providing `curl`, `fetch`, and `axios` snippets for `POST /api/v1/forms/:slug/submit` with `x-api-key`.
+### 3.2 Geometría y Dicotomía de Formas
+* **Botones:** `borderRadius: 9999px` (forma de píldora estricta).
+* **Contenedores, Tarjetas e Inputs:** `borderRadius: 4px` (esquinas afiladas de precisión técnica).
+* **Elevación:** Capas superficiales (`#151617` sobre `#000000`) delimitadas por bordes finos de 1px en `#303236`.
 
 ---
 
-## 5. Routing Strategy & Guards
+## 4. Ciclo de Vida de Autenticación
 
-```text
-appRouter.tsx
-├── /auth (BlankLayout, Public)
-│   ├── /login
-│   ├── /forgot-password
-│   ├── /reset-password
-│   └── /verify-account
-│
-└── / (FullLayout, Protected via ProtectedRoute)
-    ├── / (DashboardPage)
-    ├── /access-denied (AccessDeniedPage)
-    ├── /websites (websitesRoutes, Protected by 'websites:read')
-    │   ├── /:id (WebsiteDetailPage, Protected by 'websites:read')
-    │   ├── /:websiteId/content-types/:contentTypeId (ContentTypeDetailPage, Protected by 'content-types:read')
-    │   └── /:websiteId/forms/:formId (FormDetailPage, Protected by 'forms:read')
-    ├── /users (usersRoutes, Protected by 'users:read')
-    ├── /roles (rolesRoutes, Protected by 'roles:read')
-    ├── /audit-logs (auditRoutes, Protected by 'audit:read')
-    └── /profile (profileRoutes)
-```
-
-Route-level security is enforced through `<RouteProtector requiredPermission="..." />`. If the authenticated user lacks the required permission, they are automatically redirected to `/access-denied`.
+1. **Login:** El usuario envía credenciales en `/auth/login`. El backend responde con `accessToken` y datos del usuario, fijando la cookie `refreshToken`.
+2. **Almacenamiento:** El store `useAuthStore` almacena `accessToken` y `user`.
+3. **Peticiones Autenticadas:** Cada llamada Axios intercepta la petición e inyecta `Authorization: Bearer <accessToken>`.
+4. **Recarga de Página:** Si el usuario recarga la pestaña, `ProtectedRoute` detecta la ausencia del usuario en memoria, solicita `/api/auth/refresh` y repuebla el store sin cerrar la sesión.
+5. **Cierre de Sesión:** `/auth/logout` revoca la sesión en la base de datos, destruye la cookie en el servidor y limpia el estado local de Zustand redirigiendo a `/auth/login`.

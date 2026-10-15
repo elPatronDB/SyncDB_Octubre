@@ -15,14 +15,14 @@ const FullLayoutInner: React.FC = () => {
     const currentSidebarWidth = isCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_EXPANDED_WIDTH;
 
     return (
-        <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f8fafc' }}>
+        <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#000000' }}>
             {/* Top Navigation */}
             <Navbar />
 
             {/* Left Navigation (Desktop Mini/Expanded & Mobile Drawer) */}
             <Sidebar />
 
-            {/* Main Content Area: Automatically expands when sidebar collapses on desktop */}
+            {/* Main Content Area */}
             <Box
                 component="main"
                 sx={{
@@ -33,6 +33,7 @@ const FullLayoutInner: React.FC = () => {
                     flexDirection: 'column',
                     transition: 'width 0.25s ease',
                     minHeight: '100vh',
+                    backgroundColor: '#000000',
                 }}
             >
                 {/* Spacer pushes content below fixed AppBar */}
@@ -42,7 +43,7 @@ const FullLayoutInner: React.FC = () => {
                     sx={{
                         flex: 1,
                         p: { xs: 2, sm: 3, md: 4 },
-                        maxWidth: '1600px',
+                        maxWidth: '1400px',
                         width: '100%',
                         mx: 'auto',
                     }}

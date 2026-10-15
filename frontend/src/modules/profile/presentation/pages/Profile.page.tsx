@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
     Box,
     Typography,
@@ -11,21 +10,18 @@ import {
     Tooltip,
     Alert,
     Snackbar,
-    Button,
 } from '@mui/material';
 import {
     PersonOutlineOutlined,
     EmailOutlined,
-    BusinessOutlined,
-    BadgeOutlined,
     SecurityOutlined,
     CheckCircle,
     CalendarMonthOutlined,
     ContentCopyOutlined,
-    MenuBookOutlined,
     FingerprintOutlined,
     Check,
     LockResetOutlined,
+    SpaceDashboardOutlined,
 } from '@mui/icons-material';
 import { useAuthStore } from '../../../../core/store/authStore';
 import { getCurrentUser } from '../../../auth/infrastructure/services/auth.service';
@@ -47,29 +43,29 @@ const ProfileRow: React.FC<ProfileRowProps> = ({ icon, label, value, isLast = fa
             alignItems: { xs: 'flex-start', sm: 'center' },
             py: 1.75,
             px: { xs: 2.5, sm: 3 },
-            borderBottom: isLast ? 'none' : '0.5px solid',
-            borderColor: 'divider',
+            borderBottom: isLast ? 'none' : '1px solid #303236',
             transition: 'background-color 0.15s ease',
             '&:hover': {
-                bgcolor: 'action.hover',
+                bgcolor: 'rgba(255, 255, 255, 0.02)',
             },
             gap: 1,
         }}
     >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 240 }}>
             {icon && (
-                <Box sx={{ color: 'text.secondary', display: 'flex', alignItems: 'center', fontSize: '18px' }}>
+                <Box sx={{ color: '#797d86', display: 'flex', alignItems: 'center', fontSize: '18px' }}>
                     {icon}
                 </Box>
             )}
             <Typography
                 variant="body2"
                 sx={{
-                    color: 'text.secondary',
+                    color: '#797d86',
                     fontWeight: 500,
                     textTransform: 'uppercase',
-                    letterSpacing: '0.04rem',
+                    letterSpacing: '0.05rem',
                     fontSize: '11px',
+                    fontFamily: 'var(--font-geistmono, monospace)',
                 }}
             >
                 {label}
@@ -78,8 +74,8 @@ const ProfileRow: React.FC<ProfileRowProps> = ({ icon, label, value, isLast = fa
 
         <Box
             sx={{
-                color: 'text.primary',
-                fontWeight: 450,
+                color: '#ffffff',
+                fontWeight: 400,
                 fontSize: '13px',
                 textAlign: { xs: 'left', sm: 'right' },
                 wordBreak: 'break-word',
@@ -90,7 +86,7 @@ const ProfileRow: React.FC<ProfileRowProps> = ({ icon, label, value, isLast = fa
     </Box>
 );
 
-const GoogleCard: React.FC<{
+const NeonCard: React.FC<{
     title: string;
     subtitle?: string;
     icon?: React.ReactNode;
@@ -99,41 +95,48 @@ const GoogleCard: React.FC<{
     <Paper
         elevation={0}
         sx={{
-            border: '0.5px solid',
-            borderColor: 'divider',
-            borderRadius: '12px',
-            overflow: 'hidden',
+            borderRadius: '4px',
+            border: '1px solid #303236',
+            bgcolor: '#151617',
             mb: 3,
-            bgcolor: 'background.paper',
-            boxShadow: (theme) =>
-                theme.palette.mode === 'dark'
-                    ? '0 20px 44px rgba(0,0,0,0.14)'
-                    : '0 4px 20px rgba(0,0,0,0.04)',
+            overflow: 'hidden',
         }}
     >
-        <Box sx={{ p: { xs: 2.5, sm: 3 }, pb: 2, borderBottom: '0.5px solid', borderColor: 'divider' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
-                {icon && (
-                    <Box sx={{ color: 'primary.main', display: 'flex', alignItems: 'center', fontSize: 18 }}>
-                        {icon}
-                    </Box>
-                )}
-                <Typography variant="h6" sx={{ fontWeight: 500, fontSize: '16px', letterSpacing: '-0.32px', color: 'text.primary' }}>
+        <Box
+            sx={{
+                px: { xs: 2.5, sm: 3 },
+                py: 2,
+                borderBottom: '1px solid #303236',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1.5,
+                bgcolor: '#0a0a0b',
+            }}
+        >
+            {icon && (
+                <Box sx={{ color: '#34d59a', display: 'flex', alignItems: 'center' }}>
+                    {icon}
+                </Box>
+            )}
+            <Box>
+                <Typography variant="h6" sx={{ fontSize: '15px', fontWeight: 600, color: '#ffffff' }}>
                     {title}
                 </Typography>
+                {subtitle && (
+                    <Typography variant="caption" sx={{ color: '#797d86', display: 'block', fontSize: '12px' }}>
+                        {subtitle}
+                    </Typography>
+                )}
             </Box>
-            {subtitle && (
-                <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '13px' }}>
-                    {subtitle}
-                </Typography>
-            )}
         </Box>
-        <Box>{children}</Box>
+
+        <Box sx={{ p: 0 }}>
+            {children}
+        </Box>
     </Paper>
 );
 
 export const ProfilePage: React.FC = () => {
-    const navigate = useNavigate();
     const { user: cachedUser, accessToken, setUser } = useAuthStore();
     const [profile, setProfile] = useState<AuthUser | null>(cachedUser);
     const [loading, setLoading] = useState(false);
@@ -180,7 +183,7 @@ export const ProfilePage: React.FC = () => {
     if (loading && !displayUser) {
         return (
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
-                <CircularProgress sx={{ color: '#3b82f6' }} />
+                <CircularProgress sx={{ color: '#34d59a' }} />
             </Box>
         );
     }
@@ -199,9 +202,6 @@ export const ProfilePage: React.FC = () => {
 
     const firstName = displayUser.firstName || displayUser.name?.split(' ')[0] || '';
     const lastName = displayUser.lastName || displayUser.name?.split(' ').slice(1).join(' ') || '';
-    const rolesList = displayUser.roles && displayUser.roles.length > 0
-        ? displayUser.roles
-        : (displayUser.role ? [displayUser.role] : ['Usuario']);
 
     const formattedDate = displayUser.createdAt
         ? new Date(displayUser.createdAt).toLocaleDateString('es-ES', {
@@ -212,9 +212,9 @@ export const ProfilePage: React.FC = () => {
         : 'Activo en el sistema';
 
     return (
-        <Box sx={{ maxWidth: 960, mx: 'auto', py: 2, px: { xs: 1, sm: 3 } }}>
+        <Box sx={{ maxWidth: 860, mx: 'auto', py: 2, px: { xs: 1, sm: 2 } }}>
             {error && (
-                <Alert severity="warning" sx={{ mb: 3, borderRadius: '10px' }} onClose={() => setError(null)}>
+                <Alert severity="warning" sx={{ mb: 3, borderRadius: '4px', bgcolor: '#151617', color: '#ff3621', border: '1px solid #303236' }} onClose={() => setError(null)}>
                     {error}
                 </Alert>
             )}
@@ -232,84 +232,67 @@ export const ProfilePage: React.FC = () => {
             >
                 <Avatar
                     sx={{
-                        width: 88,
-                        height: 88,
-                        bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#1f1f21' : '#f1f5f9'),
-                        color: 'primary.main',
-                        fontSize: '2rem',
-                        fontWeight: 600,
+                        width: 80,
+                        height: 80,
+                        bgcolor: '#0a0a0b',
+                        color: '#34d59a',
+                        fontSize: '1.75rem',
+                        fontWeight: 700,
                         mb: 2,
-                        border: '0.5px solid',
-                        borderColor: 'divider',
-                        boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.25)',
+                        border: '1px solid #34d59a',
+                        boxShadow: '0 0 20px rgba(52, 213, 154, 0.25)',
                     }}
                 >
                     {initials}
                 </Avatar>
 
-                <Typography variant="h4" sx={{ fontWeight: 500, fontSize: '24px', letterSpacing: '-0.64px', mb: 0.5, color: 'text.primary' }}>
+                <Typography variant="h3" sx={{ fontWeight: 600, fontSize: '24px', letterSpacing: '-0.64px', mb: 0.5, color: '#ffffff' }}>
                     {displayUser.name}
                 </Typography>
 
-                <Typography variant="body1" sx={{ color: 'text.secondary', fontSize: '13px', mb: 2 }}>
+                <Typography variant="body2" sx={{ color: '#797d86', fontSize: '13px', mb: 2 }}>
                     {displayUser.email}
                 </Typography>
 
                 <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
-                    {rolesList.map((role) => (
-                        <Chip
-                            key={role}
-                            icon={<SecurityOutlined sx={{ fontSize: 16 }} />}
-                            label={role}
-                            size="small"
-                            variant="outlined"
-                            sx={{
-                                fontWeight: 500,
-                                fontSize: '11px',
-                                borderRadius: '6px',
-                                borderColor: 'rgba(59, 130, 246, 0.3)',
-                                color: '#60a5fa',
-                                bgcolor: 'rgba(59, 130, 246, 0.08)',
-                            }}
-                        />
-                    ))}
+                    <Chip
+                        icon={<SpaceDashboardOutlined sx={{ fontSize: 16, color: '#34d59a !important' }} />}
+                        label="Consola Master"
+                        size="small"
+                        variant="outlined"
+                        sx={{
+                            fontWeight: 600,
+                            fontSize: '11px',
+                            borderRadius: '4px',
+                            borderColor: 'rgba(52, 213, 154, 0.3)',
+                            color: '#34d59a',
+                            bgcolor: 'rgba(52, 213, 154, 0.08)',
+                            fontFamily: 'var(--font-geistmono, monospace)',
+                        }}
+                    />
 
                     <Chip
-                        icon={<CheckCircle sx={{ fontSize: 16, color: 'success.main !important' }} />}
+                        icon={<CheckCircle sx={{ fontSize: 16, color: '#34d59a !important' }} />}
                         label={displayUser.isActive !== false ? 'Cuenta Activa' : 'Cuenta Inactiva'}
                         size="small"
                         variant="outlined"
                         sx={{
                             fontWeight: 500,
                             fontSize: '11px',
-                            borderRadius: '6px',
-                            borderColor: 'rgba(34, 197, 94, 0.3)',
-                            color: '#4ade80',
-                            bgcolor: 'rgba(34, 197, 94, 0.08)',
-                        }}
-                    />
-
-                    <Chip
-                        icon={<BusinessOutlined sx={{ fontSize: 16 }} />}
-                        label="Sistema de Archivo e Imágenes"
-                        variant="outlined"
-                        size="small"
-                        sx={{
-                            fontWeight: 450,
-                            fontSize: '11px',
-                            borderRadius: '6px',
-                            borderColor: 'divider',
-                            color: 'text.secondary',
-                            bgcolor: 'action.hover',
+                            borderRadius: '4px',
+                            borderColor: '#303236',
+                            color: '#ffffff',
+                            bgcolor: '#0a0a0b',
+                            fontFamily: 'var(--font-geistmono, monospace)',
                         }}
                     />
                 </Box>
             </Box>
 
-            {/* Card 1: Información Personal Básica */}
-            <GoogleCard
+            {/* Card 1: Información Personal */}
+            <NeonCard
                 title="Información personal"
-                subtitle="Información básica de tu identidad en el sistema"
+                subtitle="Datos de identidad y cuenta"
                 icon={<PersonOutlineOutlined />}
             >
                 <ProfileRow
@@ -334,61 +317,15 @@ export const ProfilePage: React.FC = () => {
                 <ProfileRow
                     icon={<EmailOutlined />}
                     label="Correo Electrónico"
+                    isLast
                     value={displayUser.email}
                 />
-                <ProfileRow
-                    icon={<BadgeOutlined />}
-                    label="Roles de Usuario"
-                    isLast
-                    value={
-                        <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap', justifyContent: { xs: 'flex-start', sm: 'flex-end' } }}>
-                            {rolesList.map((role) => (
-                                <Chip
-                                    key={role}
-                                    label={role}
-                                    size="small"
-                                    variant="outlined"
-                                    color="primary"
-                                    sx={{ fontWeight: 600, fontSize: '0.75rem', borderRadius: '6px' }}
-                                />
-                            ))}
-                        </Box>
-                    }
-                />
-            </GoogleCard>
+            </NeonCard>
 
-            {/* Card 2: Entorno y Plataforma */}
-            <GoogleCard
-                title="Entorno y Asignación Institucional"
-                subtitle="Detalles de la plataforma y ámbito asignado al usuario"
-                icon={<BusinessOutlined />}
-            >
-                <ProfileRow
-                    icon={<BusinessOutlined />}
-                    label="Plataforma / Sistema"
-                    value={
-                        <Typography variant="body2" sx={{ fontWeight: 600, color: 'primary.main' }}>
-                            Web Admin System
-                        </Typography>
-                    }
-                />
-                <ProfileRow
-                    icon={<MenuBookOutlined />}
-                    label="Ámbito Operativo"
-                    value="Administración Central y Gestión de Sitios Web"
-                />
-                <ProfileRow
-                    icon={<SecurityOutlined />}
-                    label="Nivel de Acceso"
-                    isLast
-                    value={rolesList.join(', ')}
-                />
-            </GoogleCard>
-
-            {/* Card 3: Seguridad y Estado de la Cuenta */}
-            <GoogleCard
-                title="Seguridad y Estado de la Cuenta"
-                subtitle="Control de acceso y registro en la plataforma"
+            {/* Card 2: Seguridad y Credenciales */}
+            <NeonCard
+                title="Seguridad y Credenciales"
+                subtitle="Opciones de autenticación y claves de acceso"
                 icon={<SecurityOutlined />}
             >
                 <ProfileRow
@@ -396,39 +333,27 @@ export const ProfilePage: React.FC = () => {
                     label="Estado de la Cuenta"
                     value={
                         <Chip
-                            icon={<CheckCircle fontSize="small" sx={{ color: 'success.main !important' }} />}
+                            icon={<CheckCircle fontSize="small" sx={{ color: '#34d59a !important' }} />}
                             label={displayUser.isActive !== false ? 'Activa y Verificada' : 'Inactiva'}
                             size="small"
                             sx={{
-                                bgcolor: 'rgba(46, 125, 50, 0.08)',
-                                color: 'success.dark',
+                                bgcolor: 'rgba(52, 213, 154, 0.1)',
+                                color: '#34d59a',
                                 fontWeight: 600,
-                                borderRadius: '6px',
+                                borderRadius: '4px',
+                                border: '1px solid rgba(52, 213, 154, 0.3)',
+                                fontFamily: 'var(--font-geistmono, monospace)',
                             }}
                         />
                     }
                 />
                 <ProfileRow
                     icon={<LockResetOutlined />}
-                    label="Contraseña de Acceso"
+                    label="Credenciales"
                     value={
-                        <Button
-                            id="profile-change-password-btn"
-                            variant="outlined"
-                            size="small"
-                            startIcon={<LockResetOutlined sx={{ fontSize: 16 }} />}
-                            onClick={() => navigate('/auth/change-password')}
-                            sx={{
-                                borderRadius: '8px',
-                                textTransform: 'none',
-                                fontWeight: 500,
-                                fontSize: '12px',
-                                px: 1.75,
-                                py: 0.5,
-                            }}
-                        >
-                            Cambiar contraseña
-                        </Button>
+                        <Typography variant="body2" sx={{ color: '#797d86', fontSize: '13px', fontFamily: 'var(--font-geistmono, monospace)' }}>
+                            Protegida con hash Argon2
+                        </Typography>
                     }
                 />
                 <ProfileRow
@@ -445,11 +370,13 @@ export const ProfilePage: React.FC = () => {
                             <Typography
                                 variant="caption"
                                 sx={{
-                                    fontFamily: 'monospace',
-                                    bgcolor: 'action.selected',
+                                    fontFamily: 'var(--font-geistmono, monospace)',
+                                    bgcolor: '#0a0a0b',
+                                    border: '1px solid #303236',
+                                    color: '#c9cbcf',
                                     px: 1,
                                     py: 0.5,
-                                    borderRadius: 1,
+                                    borderRadius: '4px',
                                     fontSize: '0.8rem',
                                     userSelect: 'all',
                                 }}
@@ -457,9 +384,9 @@ export const ProfilePage: React.FC = () => {
                                 {displayUser.id}
                             </Typography>
                             <Tooltip title={copied ? '¡Copiado!' : 'Copiar ID'}>
-                                <IconButton size="small" onClick={() => handleCopyId(displayUser.id)}>
+                                <IconButton size="small" onClick={() => handleCopyId(displayUser.id)} sx={{ color: '#797d86', '&:hover': { color: '#34d59a' } }}>
                                     {copied ? (
-                                        <Check fontSize="small" color="success" />
+                                        <Check fontSize="small" sx={{ color: '#34d59a' }} />
                                     ) : (
                                         <ContentCopyOutlined fontSize="small" />
                                     )}
@@ -468,7 +395,7 @@ export const ProfilePage: React.FC = () => {
                         </Box>
                     }
                 />
-            </GoogleCard>
+            </NeonCard>
 
             <Snackbar
                 open={snackbar.open}
@@ -479,7 +406,7 @@ export const ProfilePage: React.FC = () => {
                 <Alert
                     onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
                     severity={snackbar.severity}
-                    sx={{ width: '100%', borderRadius: '8px' }}
+                    sx={{ width: '100%', borderRadius: '4px', bgcolor: '#151617', color: '#ffffff', border: '1px solid #303236' }}
                 >
                     {snackbar.message}
                 </Alert>
@@ -489,4 +416,3 @@ export const ProfilePage: React.FC = () => {
 };
 
 export default ProfilePage;
-

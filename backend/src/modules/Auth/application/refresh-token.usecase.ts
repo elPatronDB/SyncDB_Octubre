@@ -3,54 +3,49 @@ import type { AuthSession } from "../domain/auth-session.entity.js";
 import type { AuthRepository } from "../domain/auth.repository.js";
 import type JwtProvider from "../domain/jwt.provider.js";
 
-
-
 interface RefreshResponse {
     accessToken: string;
     refreshToken: string;
     user: {
         id: string;
         name: string;
+        firstName: string;
+        lastName: string;
         email: string;
-        permissions: string[];
-        roles: string[];
+        avatarUrl?: string | null;
         isVerify: boolean;
-    }
-}   
-
+    };
+}
 
 export class RefreshTokenUseCase {
-    
-    constructor (
+    constructor(
         private readonly authRepository: AuthRepository,
         private readonly jwtProvider: JwtProvider
-    ) {}
+    ) { }
 
-    async execute(token: AuthSession['token']): Promise<RefreshResponse>{
+    async execute(token: AuthSession['token']): Promise<RefreshResponse> {
+        const payload = await this.jwtProvider.verifyToken(token);
 
-        const payload = await this.jwtProvider.verifyToken(token)
-        
-        const existingSession = await this.authRepository.findSessionByToken(token)
+        const existingSession = await this.authRepository.findSessionByToken(token);
 
         if (!existingSession) {
-            throw new AppError("Unauthorized: Invalid token", "UNAUTHORIZED", 401)
+            throw new AppError("Unauthorized: Invalid token", "UNAUTHORIZED", 401);
         }
 
         if (!payload.sub) {
-            throw new AppError("Malformed token: missing claims", "INVALID_TOKEN_PAYLOAD", 401)
+            throw new AppError("Malformed token: missing claims", "INVALID_TOKEN_PAYLOAD", 401);
         }
 
-        const user = await this.authRepository.findById(payload.sub)
+        const user = await this.authRepository.findById(payload.sub);
 
         if (!user || !user.isActive) {
-            throw new AppError("User not found or inactive", "USER_NOT_ALLOWED", 401)
+            throw new AppError("User not found or inactive", "USER_NOT_ALLOWED", 401);
         }
 
         const { accessToken, refreshToken } = await this.jwtProvider.generateTokens(
             payload.sub,
-            user.roles,
-            user.permissions
-        )
+            user.email
+        );
 
         const expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + 7);
@@ -59,19 +54,20 @@ export class RefreshTokenUseCase {
             payload.sub,
             refreshToken,
             expiresAt
-        )
-    
+        );
+
         return {
             accessToken,
             refreshToken,
             user: {
                 id: user.id,
                 name: `${user.firstName} ${user.lastName}`.trim(),
+                firstName: user.firstName,
+                lastName: user.lastName,
                 email: user.email,
-                permissions: user.permissions,
-                roles: user.roles,
+                avatarUrl: user.avatarUrl,
                 isVerify: user.isVerify,
             }
-        }
+        };
     }
 }

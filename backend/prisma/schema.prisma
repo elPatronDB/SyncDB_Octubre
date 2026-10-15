@@ -11,40 +11,26 @@ generator client {
 // ENUMS
 // ======================================================
 
-enum AuditAction {
-  LOGIN
-  LOGOUT
-  CREATE
-  UPDATE
-  DELETE
-}
-
-enum FieldType {
-  STRING
-  TEXT
-  NUMBER
-  BOOLEAN
-  DATE
-  JSON
-  URL
-}
-
-enum SubmissionStatus {
-  PENDING
-  PROCESSED
-  SPAM
-  FAILED
-}
-
-enum ContactStatus {
-  LEAD
+enum ProjectStatus {
+  DRAFT
   ACTIVE
-  UNSUBSCRIBED
+  CALIBRATING
+  COMPLETED
   ARCHIVED
 }
 
+enum DeviceRole {
+  ANCHOR // Dispositivo fijo para referenciar límites del espacio
+  PROBE // Dispositivo móvil sensor de audio / micrófono
+}
+
+enum ConnectionStatus {
+  CONNECTED
+  DISCONNECTED
+}
+
 // ======================================================
-// USER & AUTHENTICATION (RBAC)
+// USERS & AUTHENTICATION
 // ======================================================
 
 model User {
@@ -59,10 +45,8 @@ model User {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  userRoles UserRole[]
-  session   UserSession?
-  auditLogs AuditLog[]
-  websites  Website[]    @relation("UserWebsites")
+  session  UserSession?
+  projects Project[]
 
   @@map("users")
 }
@@ -79,242 +63,110 @@ model UserSession {
   @@map("user_sessions")
 }
 
-model Role {
-  id          String   @id @default(uuid())
-  name        String   @unique // Ej: "SUPER_ADMIN", "ADMIN", "USER"
-  description String?
-  isSystem    Boolean  @default(false) @map("is_system")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+// ======================================================
+// CALIBRATION PROJECTS & SESSIONS
+// ======================================================
 
-  userRoles       UserRole[]
-  rolePermissions RolePermission[]
+model Project {
+  id            String        @id @default(uuid())
+  userId        String        @map("user_id")
+  name          String
+  description   String?       @db.Text
+  accessCode    String        @unique @default(uuid()) @map("access_code") // Token/slug para el link público de conexión
+  isShareActive Boolean       @default(true) @map("is_share_active")
+  status        ProjectStatus @default(DRAFT)
 
-  @@map("roles")
-}
+  // Parámetros de referencia del recinto (dimensiones estimadas en metros)
+  roomWidth  Float? @map("room_width")
+  roomLength Float? @map("room_length")
+  roomHeight Float? @map("room_height")
 
-model Permission {
-  id          String   @id @default(uuid())
-  action      String   @unique // Ej: "users:create", "websites:delete"
-  description String?
-  createdAt   DateTime @default(now()) @map("created_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  rolePermissions RolePermission[]
+  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  devices      Device[]
+  measurements AudioMeasurement[]
 
-  @@map("permissions")
-}
-
-model UserRole {
-  userId     String   @map("user_id")
-  roleId     String   @map("role_id")
-  assignedAt DateTime @default(now()) @map("assigned_at")
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
-
-  @@id([userId, roleId])
-  @@map("user_roles")
-}
-
-model RolePermission {
-  roleId       String   @map("role_id")
-  permissionId String   @map("permission_id")
-  assignedAt   DateTime @default(now()) @map("assigned_at")
-
-  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
-
-  @@id([roleId, permissionId])
-  @@map("role_permissions")
+  @@index([userId])
+  @@map("projects")
 }
 
 // ======================================================
-// WEBSITES & MULTI-TENANCY
+// CONNECTED DEVICES
 // ======================================================
 
-model Website {
-  id              String   @id @default(uuid())
-  name            String
-  domain          String   @unique
-  apiKey          String   @unique @default(uuid()) @map("api_key")
-  hostingProvider String?  @map("hosting_provider")
-  hostingNotes    String?  @map("hosting_notes") @db.Text
-  isActive        Boolean  @default(true) @map("is_active")
-  ownerId         String?  @map("owner_id")
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
+model Device {
+  id                String           @id @default(uuid())
+  projectId         String           @map("project_id")
+  socketId          String?          @map("socket_id") // ID de sesión WebSockets activa
+  browserIdentifier String           @map("browser_identifier") // UUID persistente del navegador del cliente
+  deviceToken       String?          @unique @map("device_token") // Token seguro de autenticación emitido al dispositivo
+  name              String? // Ej: "iPhone 15 - Ancla Frontal"
+  role              DeviceRole       @default(PROBE)
+  isAnchor          Boolean          @default(false) @map("is_anchor")
+  status            ConnectionStatus @default(CONNECTED)
 
-  owner          User?           @relation("UserWebsites", fields: [ownerId], references: [id], onDelete: SetNull)
-  contentTypes   ContentType[]
-  forms          Form[]
-  emailTemplates EmailTemplate[]
-  contacts       Contact[]
+  // Metadatos de hardware del navegador
+  deviceModel String? @map("device_model")
+  browserInfo String? @map("browser_info")
+  audioSpecs  Json?   @map("audio_specs") // Sample rate, canales, buffer, mic label
 
-  @@map("websites")
+  // Coordenadas espaciales del recinto (2D o 3D dentro del plano generado por las anclas)
+  positionX Float? @default(0) @map("position_x")
+  positionY Float? @default(0) @map("position_y")
+  positionZ Float? @default(0) @map("position_z")
+
+  // Coordenadas geográficas GPS reales
+  latitude              Float?
+  longitude             Float?
+  accuracy              Float?
+  altitude              Float?
+  hasLocationPermission Boolean   @default(false) @map("has_location_permission")
+  lastLocationAt        DateTime? @map("last_location_at")
+  ipAddress             String?   @map("ip_address")
+
+  // Calibración local de ganancia si se calibra previamente contra un sonómetro patrón
+  calibrationOffsetDb Float @default(0.0) @map("calibration_offset_db")
+
+  lastSeenAt DateTime @default(now()) @map("last_seen_at")
+  joinedAt   DateTime @default(now()) @map("joined_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  project      Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  measurements AudioMeasurement[]
+
+  @@unique([projectId, browserIdentifier])
+  @@index([projectId, status])
+  @@index([deviceToken])
+  @@map("devices")
 }
 
 // ======================================================
-// CONSUMABLES / CONTENT BUILDER (HEADLESS CMS)
+// AUDIO MEASUREMENTS & SNAPSHOTS
 // ======================================================
 
-model ContentType {
-  id          String   @id @default(uuid())
-  websiteId   String   @map("website_id")
-  name        String // Ej: "Productos", "Blog Posts"
-  slug        String // Ej: "productos", "blog-posts"
-  description String?  @db.Text
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+model AudioMeasurement {
+  id        String @id @default(uuid())
+  projectId String @map("project_id")
+  deviceId  String @map("device_id")
 
-  website Website        @relation(fields: [websiteId], references: [id], onDelete: Cascade)
-  fields  ContentField[]
-  items   ContentItem[]
+  // Valores acústicos capturados
+  decibels  Float // Nivel dB SPL medido
+  peakDb    Float? @map("peak_db")
+  frequency Float? // Frecuencia dominante en Hz (opcional si usas FFT)
 
-  @@unique([websiteId, slug])
-  @@map("content_types")
-}
+  // Coordenadas exactas en el instante de la toma
+  coordX Float  @map("coord_x")
+  coordY Float  @map("coord_y")
+  coordZ Float? @default(0) @map("coord_z")
 
-model ContentField {
-  id            String    @id @default(uuid())
-  contentTypeId String    @map("content_type_id")
-  name          String // Ej: "Precio", "En Stock"
-  key           String // Ej: "price", "in_stock"
-  type          FieldType @default(STRING)
-  isRequired    Boolean   @default(false) @map("is_required")
-  createdAt     DateTime  @default(now()) @map("created_at")
+  recordedAt DateTime @default(now()) @map("recorded_at")
 
-  contentType ContentType @relation(fields: [contentTypeId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  device  Device  @relation(fields: [deviceId], references: [id], onDelete: Cascade)
 
-  @@unique([contentTypeId, key])
-  @@map("content_fields")
-}
-
-model ContentItem {
-  id            String   @id @default(uuid())
-  contentTypeId String   @map("content_type_id")
-  data          Json // Payload flexible: { "price": 99.99, "in_stock": true }
-  isPublished   Boolean  @default(true) @map("is_published")
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
-
-  contentType ContentType @relation(fields: [contentTypeId], references: [id], onDelete: Cascade)
-
-  @@map("content_items")
-}
-
-// ======================================================
-// EMAIL TEMPLATES
-// ======================================================
-
-model EmailTemplate {
-  id          String   @id @default(uuid())
-  websiteId   String   @map("website_id")
-  name        String // Ej: "Notificación de Contacto"
-  subject     String // Ej: "Nuevo mensaje de {{name}}"
-  htmlContent String   @map("html_content") @db.Text
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-
-  website Website @relation(fields: [websiteId], references: [id], onDelete: Cascade)
-  forms   Form[]
-
-  @@map("email_templates")
-}
-
-// ======================================================
-// FORM BUILDER & SUBMISSIONS
-// ======================================================
-
-model Form {
-  id              String   @id @default(uuid())
-  websiteId       String   @map("website_id")
-  name            String // Ej: "Formulario de Contacto Principal"
-  slug            String // Identificador de endpoint: /api/v1/forms/:slug/submit
-  sendEmail       Boolean  @default(false) @map("send_email")
-  emailFrom       String?  @map("email_from")
-  recipientEmails Json?    @map("recipient_emails")
-  emailTemplateId String?  @map("email_template_id")
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
-
-  website       Website          @relation(fields: [websiteId], references: [id], onDelete: Cascade)
-  emailTemplate EmailTemplate?   @relation(fields: [emailTemplateId], references: [id], onDelete: SetNull)
-  fields        FormField[]
-  submissions   FormSubmission[]
-
-  @@unique([websiteId, slug])
-  @@map("forms")
-}
-
-model FormField {
-  id         String    @id @default(uuid())
-  formId     String    @map("form_id")
-  label      String // Ej: "Correo Electrónico"
-  key        String // Ej: "email"
-  type       FieldType @default(STRING)
-  isRequired Boolean   @default(false) @map("is_required")
-  createdAt  DateTime  @default(now()) @map("created_at")
-
-  form Form @relation(fields: [formId], references: [id], onDelete: Cascade)
-
-  @@unique([formId, key])
-  @@map("form_fields")
-}
-
-model FormSubmission {
-  id        String           @id @default(uuid())
-  formId    String           @map("form_id")
-  contactId String?          @map("contact_id")
-  data      Json // Raw data: { "name": "Juan", "email": "juan@example.com", "message": "Hola" }
-  status    SubmissionStatus @default(PENDING)
-  createdAt DateTime         @default(now()) @map("created_at")
-
-  form    Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
-  contact Contact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
-
-  @@map("form_submissions")
-}
-
-// ======================================================
-// CONTACTS & CRM CORE
-// ======================================================
-
-model Contact {
-  id         String        @id @default(uuid())
-  websiteId  String        @map("website_id")
-  email      String
-  firstName  String?       @map("first_name")
-  lastName   String?       @map("last_name")
-  phone      String?
-  company    String?
-  status     ContactStatus @default(LEAD)
-  customData Json?         @map("custom_data") // Datos extra recolectados
-  tags       Json? // Ej: ["landing-astro", "boletin"]
-  createdAt  DateTime      @default(now()) @map("created_at")
-  updatedAt  DateTime      @updatedAt @map("updated_at")
-
-  website     Website          @relation(fields: [websiteId], references: [id], onDelete: Cascade)
-  submissions FormSubmission[]
-
-  @@unique([websiteId, email])
-  @@index([email])
-  @@map("contacts")
-}
-
-// ======================================================
-// AUDIT SYSTEM
-// ======================================================
-
-model AuditLog {
-  id         String      @id @default(uuid())
-  userId     String?     @map("user_id")
-  action     AuditAction
-  resource   String // Ej: "websites", "users", "forms"
-  resourceId String?     @map("resource_id")
-  details    Json?
-  createdAt  DateTime    @default(now()) @map("created_at")
-
-  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
-
-  @@map("audit_logs")
+  @@index([projectId, recordedAt])
+  @@index([deviceId])
+  @@map("audio_measurements")
 }

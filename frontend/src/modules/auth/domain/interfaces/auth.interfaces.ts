@@ -1,15 +1,14 @@
 export interface AuthUser {
     id: string;
     name: string;
-    firstName?: string;
-    lastName?: string;
+    firstName: string;
+    lastName: string;
     email: string;
-    role?: string;
-    roles?: string[];
-    permissions: string[];
+    avatarUrl?: string | null;
     isActive?: boolean;
     isVerify?: boolean;
     createdAt?: string | Date;
+    updatedAt?: string | Date;
 }
 
 export interface AuthTokens {

@@ -1,20 +1,18 @@
 import { Suspense, lazy } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { authRoutes } from '../../modules/auth/presentation/auth.routes';
-import { websitesRoutes } from '../../modules/websites/presentation/websites.routes';
-import { contactsRoutes } from '../../modules/contacts/presentation/contacts.routes';
-import { usersRoutes } from '../../modules/users/presentation/users.routes';
 import { profileRoutes } from '../../modules/profile/presentation/profile.routes';
-import { auditRoutes } from '../../modules/audit/presentation/audit.routes';
-import { rolesRoutes } from '../../modules/roles/presentation/roles.routes';
+import { projectsRoutes } from '../../modules/projects/presentation/projects.routes';
 import ProtectedRoute from './ProtectedRoute';
 
 import { FullPageLoader } from '../../shared/components/loaders';
-import { AccessDeniedPage } from '../../shared/pages';
 import DashboardPage from '../../shared/pages/Dashboard.page';
 
 const BlankLayout = lazy(() => import('../layouts/blankLayout'));
 const FullLayout = lazy(() => import('../layouts/fullLayout'));
+const PublicDeviceRegisterPage = lazy(
+    () => import('../../modules/projects/presentation/public/PublicDeviceRegister.page')
+);
 
 export const appRouter = createBrowserRouter([
     // ── Public routes (unauthenticated) ──────────────────────────────────────
@@ -26,6 +24,36 @@ export const appRouter = createBrowserRouter([
             </Suspense>
         ),
         children: [...authRoutes],
+    },
+
+    // ── Public Device Join routes ────────────────────────────────────────────
+    {
+        path: '/p/:accessCode',
+        element: (
+            <Suspense fallback={<FullPageLoader />}>
+                <BlankLayout />
+            </Suspense>
+        ),
+        children: [
+            {
+                index: true,
+                element: <PublicDeviceRegisterPage />,
+            },
+        ],
+    },
+    {
+        path: '/join/:accessCode',
+        element: (
+            <Suspense fallback={<FullPageLoader />}>
+                <BlankLayout />
+            </Suspense>
+        ),
+        children: [
+            {
+                index: true,
+                element: <PublicDeviceRegisterPage />,
+            },
+        ],
     },
 
     // ── Protected routes (authenticated) ─────────────────────────────────────
@@ -44,39 +72,19 @@ export const appRouter = createBrowserRouter([
                     </Suspense>
                 ),
                 children: [
-                    // Dashboard — default route
+                    // Master Console / Dashboard
                     {
                         index: true,
                         element: <DashboardPage />,
                     },
 
-                    // Access Denied — reached when RouteProtector denies access
+                    // Projects CRUD & Details
                     {
-                        path: 'access-denied',
-                        element: <AccessDeniedPage />,
+                        path: 'projects',
+                        children: [...projectsRoutes],
                     },
 
-                    // ── Module routes ──
-                    {
-                        path: 'websites',
-                        children: [...websitesRoutes],
-                    },
-                    {
-                        path: 'contacts',
-                        children: [...contactsRoutes],
-                    },
-                    {
-                        path: 'users',
-                        children: [...usersRoutes],
-                    },
-                    {
-                        path: 'audit-logs',
-                        children: [...auditRoutes],
-                    },
-                    {
-                        path: 'roles',
-                        children: [...rolesRoutes],
-                    },
+                    // User Profile
                     {
                         path: 'profile',
                         children: [...profileRoutes],

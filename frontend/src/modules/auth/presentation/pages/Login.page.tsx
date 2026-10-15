@@ -16,7 +16,7 @@ import {
     Stack,
     Divider,
 } from '@mui/material';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { Visibility, VisibilityOff, TerminalOutlined } from '@mui/icons-material';
 import { loginSchema, type LoginFormValues } from '../../domain/schemas/auth.schemas';
 import { loginUser } from '../../infrastructure/services/auth.service';
 import { useAuthStore } from '../../../../core/store/authStore';
@@ -48,13 +48,9 @@ const LoginPage = () => {
         try {
             const response = await loginUser(values);
             setAuth(response.accessToken, response.user);
-            if (response.user.isVerify === false) {
-                navigate('/auth/verify-account', { replace: true });
-            } else {
-                navigate(from, { replace: true });
-            }
+            navigate(from, { replace: true });
         } catch {
-            setServerError('Invalid email or password. Please try again.');
+            setServerError('Credenciales inválidas. Por favor intenta de nuevo.');
         }
     };
 
@@ -65,61 +61,79 @@ const LoginPage = () => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                backgroundColor: '#f8f9fb',    // Cloud canvas
+                backgroundColor: '#000000', // Blackout
                 p: 2,
             }}
         >
-            <Box sx={{ width: '100%', maxWidth: 440 }}>
-
+            <Box sx={{ width: '100%', maxWidth: 420 }}>
                 {/* Brand header */}
-                <Stack sx={{ alignItems: 'center', mb: 4, gap: 1 }}>
-                    {/* Logo mark — Signal Blue square */}
+                <Stack sx={{ alignItems: 'center', mb: 4, gap: 1.5 }}>
+                    {/* Glowing Logo Icon */}
                     <Box
-                        component="img"
-                        src={"/logo.png"}
-                        alt={"Logo"}
                         sx={{
-                            width: 100,
-                            height: 100,
-                            borderRadius: '10px',
-                            mb: 0.5,
+                            width: 56,
+                            height: 56,
+                            borderRadius: '4px',
+                            backgroundColor: '#0a0a0b',
+                            border: '1px solid #34d59a',
+                            boxShadow: '0 0 24px rgba(52, 213, 154, 0.25)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: '#34d59a',
+                            mb: 1,
                         }}
-                    />
+                    >
+                        <TerminalOutlined sx={{ fontSize: 30 }} />
+                    </Box>
+
                     <Typography
-                        variant="h2"
+                        variant="h3"
                         sx={{
-                            fontSize: '1.75rem',   // 28px subheading size
-                            fontWeight: 700,
-                            color: '#0b3558',
+                            fontSize: '1.75rem',
+                            fontWeight: 600,
+                            color: '#ffffff',
                             textAlign: 'center',
+                            letterSpacing: '-0.64px',
                         }}
                     >
-                        Welcome back
+                        SyncDB Console
                     </Typography>
+
                     <Typography
-                        variant="body1"
-                        sx={{ color: '#476788', textAlign: 'center' }}
+                        variant="body2"
+                        sx={{
+                            color: '#797d86',
+                            textAlign: 'center',
+                            fontSize: '13px',
+                            letterSpacing: '-0.3px',
+                        }}
                     >
-                        Sign in to your account to continue
+                        Inicia sesión en tu espacio de trabajo acústico
                     </Typography>
                 </Stack>
 
-                {/* Card — Product card style: 16px radius, white, blue-tinted shadow */}
+                {/* Card — Neon style: 4px radius, graphite deep, 1px graphite light border */}
                 <Card
                     sx={{
-                        borderRadius: '16px',
-                        border: '1px solid #d4e0ed',
-                        boxShadow: 'rgba(71,103,136,0.04) 0px 4px 5px 0px, rgba(71,103,136,0.03) 0px 8px 15px 0px, rgba(71,103,136,0.08) 0px 30px 50px 0px',
-                        backgroundColor: '#ffffff',
+                        borderRadius: '4px',
+                        border: '1px solid #303236',
+                        backgroundColor: '#151617',
+                        boxShadow: 'rgba(0, 0, 0, 0.5) 0px 8px 24px 0px',
                     }}
                 >
                     <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
-
                         {/* Server error */}
                         {serverError && (
                             <Alert
                                 severity="error"
-                                sx={{ mb: 3, borderRadius: 2 }}
+                                sx={{
+                                    mb: 3,
+                                    borderRadius: '4px',
+                                    backgroundColor: '#0a0a0b',
+                                    border: '1px solid #ff3621',
+                                    color: '#ff3621',
+                                }}
                                 onClose={() => setServerError(null)}
                             >
                                 {serverError}
@@ -136,7 +150,7 @@ const LoginPage = () => {
                                         <TextField
                                             {...field}
                                             id="login-email"
-                                            label="Email address"
+                                            label="Correo Electrónico"
                                             type="email"
                                             autoComplete="email"
                                             autoFocus
@@ -155,7 +169,7 @@ const LoginPage = () => {
                                         <TextField
                                             {...field}
                                             id="login-password"
-                                            label="Password"
+                                            label="Contraseña"
                                             type={showPassword ? 'text' : 'password'}
                                             autoComplete="current-password"
                                             fullWidth
@@ -171,11 +185,9 @@ const LoginPage = () => {
                                                                 onClick={() => setShowPassword((v) => !v)}
                                                                 edge="end"
                                                                 size="small"
-                                                                sx={{ color: '#a6bbd1' }}
+                                                                sx={{ color: '#797d86' }}
                                                             >
-                                                                {showPassword
-                                                                    ? <VisibilityOff fontSize="small" />
-                                                                    : <Visibility fontSize="small" />}
+                                                                {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
                                                             </IconButton>
                                                         </InputAdornment>
                                                     ),
@@ -185,63 +197,59 @@ const LoginPage = () => {
                                     )}
                                 />
 
-                                {/* Forgot password link */}
-                                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: -1 }}>
-                                    <Button
-                                        variant="text"
-                                        size="small"
-                                        onClick={() => navigate('/auth/change-password')}
-                                        sx={{
-                                            textTransform: 'none',
-                                            fontSize: '12.5px',
-                                            fontWeight: 500,
-                                            color: '#006bff',
-                                            p: 0,
-                                            minWidth: 'auto',
-                                            '&:hover': {
-                                                bgcolor: 'transparent',
-                                                textDecoration: 'underline',
-                                            },
-                                        }}
-                                    >
-                                        Forgot password?
-                                    </Button>
-                                </Box>
 
-                                {/* Submit — Primary Signal Blue CTA */}
+
+                                {/* Submit — Primary Whiteout Pill Button per DESIGN.md */}
                                 <Button
                                     id="login-submit"
                                     type="submit"
                                     variant="contained"
+                                    color="secondary"
                                     size="large"
                                     fullWidth
                                     disabled={isSubmitting}
-                                    sx={{ mt: 0.5 }}
+                                    sx={{
+                                        mt: 1,
+                                        py: 1.4,
+                                        borderRadius: '9999px',
+                                        backgroundColor: '#ffffff',
+                                        color: '#151617',
+                                        fontWeight: 600,
+                                        '&:hover': {
+                                            backgroundColor: '#c9cbcf',
+                                        },
+                                    }}
                                 >
                                     {isSubmitting ? (
-                                        <CircularProgress size={20} thickness={3} sx={{ color: '#ffffff' }} />
+                                        <CircularProgress size={20} thickness={3} sx={{ color: '#151617' }} />
                                     ) : (
-                                        'Sign in'
+                                        'Iniciar Sesión'
                                     )}
                                 </Button>
                             </Stack>
                         </form>
 
-                        {/* Divider with "or" */}
+                        {/* Divider */}
                         <Box sx={{ my: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <Divider sx={{ flex: 1 }} />
-                            <Typography variant="caption" sx={{ color: '#a6bbd1' }}>
-                                or
+                            <Divider sx={{ flex: 1, borderColor: '#303236' }} />
+                            <Typography variant="caption" sx={{ color: '#797d86', fontSize: '11px', fontFamily: 'var(--font-geistmono, monospace)' }}>
+                                ACCESO SEGURO
                             </Typography>
-                            <Divider sx={{ flex: 1 }} />
+                            <Divider sx={{ flex: 1, borderColor: '#303236' }} />
                         </Box>
 
                         {/* Footnote */}
                         <Typography
                             variant="caption"
-                            sx={{ display: 'block', textAlign: 'center', color: '#476788' }}
+                            sx={{
+                                display: 'block',
+                                textAlign: 'center',
+                                color: '#797d86',
+                                fontSize: '11px',
+                                fontFamily: 'var(--font-geistmono, monospace)',
+                            }}
                         >
-                            Contact your administrator if you need access.
+                            SyncDB Audio Calibration Engine
                         </Typography>
                     </CardContent>
                 </Card>

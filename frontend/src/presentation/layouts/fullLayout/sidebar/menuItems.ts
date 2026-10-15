@@ -1,11 +1,7 @@
 import {
     DashboardOutlined,
-    LanguageOutlined,
-    ContactsOutlined,
-    GroupOutlined,
-    AdminPanelSettingsOutlined,
-    ManageHistoryOutlined,
-    ShieldOutlined,
+    FolderOutlined,
+    PersonOutlineOutlined,
 } from '@mui/icons-material';
 import type { ElementType } from 'react';
 
@@ -15,63 +11,26 @@ export interface MenuItem {
     group?: string;
     link?: string;
     icon?: ElementType;
-    permissions?: string[];
-    requiresStudent?: boolean;
-    requiresTeacher?: boolean;
     children?: MenuItem[];
 }
 
 const MenuItems: MenuItem[] = [
-    { group: 'Main' },
+    { group: 'Workspace' },
     {
-        name: 'Dashboard',
+        name: 'Master Console',
         icon: DashboardOutlined,
         link: '/',
     },
-
-    { group: 'Sites & Audience', permissions: ['websites:read', 'contacts:read'] },
     {
-        module: 'Websites',
-        name: 'Websites',
-        icon: LanguageOutlined,
-        link: '/websites',
-        permissions: ['websites:read'],
-    },
-    {
-        module: 'Contacts',
-        name: 'Contacts',
-        icon: ContactsOutlined,
-        link: '/contacts',
-        permissions: ['contacts:read'],
-    },
-
-    { group: 'Administration', permissions: ['users:read', 'roles:read', 'audit:read', 'roles:permissions:update'] },
-    {
-        module: 'Users',
-        name: 'Users Management',
-        icon: GroupOutlined,
-        link: '/users',
-        permissions: ['users:read'],
-    },
-    {
-        module: 'Roles',
-        name: 'Roles & Permissions',
-        icon: ShieldOutlined,
-        link: '/roles',
-        permissions: ['roles:read', 'roles:permissions:update'],
-    },
-    {
-        module: 'Audit',
-        name: 'Audit Logs',
-        icon: ManageHistoryOutlined,
-        link: '/audit-logs',
-        permissions: ['audit:read'],
+        name: 'Proyectos',
+        icon: FolderOutlined,
+        link: '/projects',
     },
 
     { group: 'Account' },
     {
         name: 'My Profile',
-        icon: AdminPanelSettingsOutlined,
+        icon: PersonOutlineOutlined,
         link: '/profile',
     },
 ];

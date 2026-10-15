@@ -2,8 +2,6 @@ import AppError from "@shared/errors/AppError.js";
 import type { HashProvider } from "@shared/domain/hash.provider.js";
 import type { AuthRepository } from "../domain/auth.repository.js";
 import type JwtProvider from "../domain/jwt.provider.js";
-import type { AuditLogService } from "../../Audit/application/audit-log.service.js";
-import type { AuditContext } from "../../Audit/domain/audit-log.entity.js";
 
 interface LoginDTO {
     email: string;
@@ -16,9 +14,10 @@ interface LoginResponse {
     user: {
         id: string;
         name: string;
+        firstName: string;
+        lastName: string;
         email: string;
-        permissions: string[];
-        roles: string[];
+        avatarUrl?: string | null;
         isVerify: boolean;
     };
 }
@@ -27,14 +26,13 @@ export class LoginUseCase {
     constructor(
         private readonly authRepository: AuthRepository,
         private readonly jwtProvider: JwtProvider,
-        private readonly hashProvider: HashProvider,
-        private readonly auditLogService: AuditLogService
+        private readonly hashProvider: HashProvider
     ) { }
 
-    async execute(data: LoginDTO, context?: AuditContext): Promise<LoginResponse> {
+    async execute(data: LoginDTO): Promise<LoginResponse> {
         const { email, password } = data;
 
-        const user = await this.authRepository.findByEmail(email);
+        const user = await this.authRepository.findByEmail(email.trim().toLowerCase());
 
         if (!user) {
             throw new AppError("Invalid credentials", "INVALID_CREDENTIALS", 401);
@@ -52,7 +50,7 @@ export class LoginUseCase {
         try {
             isValid = await this.hashProvider.compare(password, user.passwordHash);
         } catch (error) {
-            console.log("Error comparing password", error);
+            console.error("Error comparing password", error);
             throw new AppError("Error comparing password", "INVALID_CREDENTIALS", 401);
         }
 
@@ -62,8 +60,7 @@ export class LoginUseCase {
 
         const { accessToken, refreshToken } = await this.jwtProvider.generateTokens(
             user.id,
-            user.roles,
-            user.permissions
+            user.email
         );
 
         const expiresAt = new Date();
@@ -75,28 +72,16 @@ export class LoginUseCase {
             expiresAt
         );
 
-        // Record LOGIN Audit Log
-        await this.auditLogService.record({
-            userId: user.id,
-            action: "LOGIN",
-            resource: "auth",
-            resourceId: user.id,
-            context,
-            details: {
-                email: user.email,
-                loginMethod: "password"
-            }
-        });
-
         return {
             accessToken,
             refreshToken,
             user: {
                 id: user.id,
                 name: `${user.firstName} ${user.lastName}`.trim(),
+                firstName: user.firstName,
+                lastName: user.lastName,
                 email: user.email,
-                permissions: user.permissions,
-                roles: user.roles,
+                avatarUrl: user.avatarUrl,
                 isVerify: user.isVerify,
             }
         };

@@ -24,8 +24,8 @@ const SidebarContent: React.FC = () => {
                 display: 'flex',
                 flexDirection: 'column',
                 height: '100%',
-                backgroundColor: '#ffffff',
-                borderRight: '1px solid #e2e8f0',
+                backgroundColor: '#0a0a0b',
+                borderRight: '1px solid #303236',
                 overflowX: 'hidden',
             }}
         >
@@ -38,37 +38,65 @@ const SidebarContent: React.FC = () => {
                     gap: 1.5,
                     px: isCollapsed ? 1 : 2.5,
                     minHeight: 64,
-                    borderBottom: '1px solid #e2e8f0',
+                    borderBottom: '1px solid #303236',
                 }}
             >
-                {/* Logo Mark */}
+                {/* Logo Mark with Neon Glow ring */}
                 <Box
-                    component="img"
-                    src="/logo.png"
                     sx={{
                         width: 32,
                         height: 32,
-                        borderRadius: '8px',
+                        borderRadius: '4px',
+                        backgroundColor: '#151617',
+                        border: '1px solid #34d59a',
+                        boxShadow: '0 0 10px rgba(52, 213, 154, 0.25)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         flexShrink: 0,
+                        color: '#34d59a',
+                        fontWeight: 700,
+                        fontSize: '14px',
+                        fontFamily: 'var(--font-geistmono, monospace)',
                     }}
-                />
+                >
+                    S
+                </Box>
 
                 {!isCollapsed && (
-                    <Typography
-                        variant="h6"
-                        noWrap
-                        sx={{
-                            fontWeight: 700,
-                            color: '#0b3558',
-                            fontSize: '1.05rem',
-                            letterSpacing: '-0.3px',
-                        }}
-                    >
-                        Cad Import Inc
-                    </Typography>
+                    <Box>
+                        <Typography
+                            variant="h6"
+                            noWrap
+                            sx={{
+                                fontWeight: 600,
+                                color: '#ffffff',
+                                fontSize: '1rem',
+                                letterSpacing: '-0.3px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 1,
+                            }}
+                        >
+                            SyncDB
+                            <Box
+                                component="span"
+                                sx={{
+                                    fontSize: '9px',
+                                    bgcolor: 'rgba(52, 213, 154, 0.12)',
+                                    color: '#34d59a',
+                                    border: '1px solid rgba(52, 213, 154, 0.3)',
+                                    px: 0.75,
+                                    py: 0.15,
+                                    borderRadius: '4px',
+                                    fontWeight: 600,
+                                    fontFamily: 'var(--font-geistmono, monospace)',
+                                }}
+                            >
+                                MASTER
+                            </Box>
+                        </Typography>
+                    </Box>
                 )}
             </Stack>
 
@@ -79,7 +107,7 @@ const SidebarContent: React.FC = () => {
                 ))}
             </List>
 
-            <Divider sx={{ borderColor: '#e2e8f0' }} />
+            <Divider sx={{ borderColor: '#303236' }} />
 
             {/* Footer version */}
             <Box
@@ -89,8 +117,15 @@ const SidebarContent: React.FC = () => {
                     textAlign: isCollapsed ? 'center' : 'left',
                 }}
             >
-                <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '11px' }}>
-                    {isCollapsed ? 'v1' : 'Cad Import Inc v1.0'}
+                <Typography
+                    variant="caption"
+                    sx={{
+                        color: '#797d86',
+                        fontSize: '11px',
+                        fontFamily: 'var(--font-geistmono, monospace)',
+                    }}
+                >
+                    {isCollapsed ? 'v2' : 'SyncDB Console v2.0'}
                 </Typography>
             </Box>
         </Box>
@@ -111,7 +146,7 @@ export const Sidebar: React.FC = () => {
                 transition: 'width 0.25s ease',
             }}
         >
-            {/* Mobile Drawer (Slide in from left over content) */}
+            {/* Mobile Drawer */}
             <Drawer
                 variant="temporary"
                 open={isMobileOpen}
@@ -122,14 +157,15 @@ export const Sidebar: React.FC = () => {
                     '& .MuiDrawer-paper': {
                         width: SIDEBAR_EXPANDED_WIDTH,
                         boxSizing: 'border-box',
-                        boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
+                        backgroundColor: '#0a0a0b',
+                        borderRight: '1px solid #303236',
                     },
                 }}
             >
                 <SidebarContent />
             </Drawer>
 
-            {/* Desktop Permanent Drawer (Mini collapsed or expanded) */}
+            {/* Desktop Permanent Drawer */}
             <Drawer
                 variant="permanent"
                 sx={{
@@ -139,6 +175,8 @@ export const Sidebar: React.FC = () => {
                         boxSizing: 'border-box',
                         transition: 'width 0.25s ease',
                         overflowX: 'hidden',
+                        backgroundColor: '#0a0a0b',
+                        borderRight: '1px solid #303236',
                     },
                 }}
                 open

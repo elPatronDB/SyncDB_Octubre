@@ -3,10 +3,10 @@ export interface AuthUser {
     firstName: string;
     lastName: string;
     email: string;
-    passwordHash: string;
+    passwordHash: string | null;
+    avatarUrl?: string | null;
     isActive: boolean;
     isVerify: boolean;
-    permissions: string[];
-    roles: string[];
     createdAt?: Date;
+    updatedAt?: Date;
 }

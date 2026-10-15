@@ -57,16 +57,6 @@ const ProtectedRoute = () => {
         );
     }
 
-    // Mandatory account activation check
-    if (user && user.isVerify === false) {
-        return (
-            <Navigate
-                to="/auth/verify-account"
-                replace
-                state={{ from: location }}
-            />
-        );
-    }
 
     return <Outlet />;
 };

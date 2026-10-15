@@ -10,7 +10,7 @@ export class AuthMiddleware {
     }
 
     /**
-     * Middleware principal para proteger rutas
+     * Middleware principal para proteger rutas mediante Bearer JWT
      */
     public routeProtect = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
@@ -25,9 +25,8 @@ export class AuthMiddleware {
             const payload = await this.jwtProvider.verifyToken(String(token));
 
             res.locals.user = {
-                id: payload.sub,
-                roles: payload.roles,
-                permissions: payload.permissions,
+                id: payload.sub as string,
+                email: payload.email as string,
             };
 
             (req as any).user = res.locals.user;
@@ -45,78 +44,5 @@ export class AuthMiddleware {
                 next(new AppError("Invalid Token", "INVALID_TOKEN", 401));
             }
         }
-    };
-
-    /**
-     * Middleware opcional para validar roles (ADMIN)
-     */
-    public checkRole = (rolesPermitidos: string[]) => {
-        return (req: Request, res: Response, next: NextFunction) => {
-            const user = (req as any).user;
-
-            if (!user || !user.roles.some((role: string) => rolesPermitidos.includes(role))) {
-                return next(new AppError("Not authorized to perform this action", "FORBIDDEN", 403));
-            }
-
-            next();
-        };
-    };
-
-    public checkPermission = (permissions: string | string[]) => {
-        return (req: Request, res: Response, next: NextFunction) => {
-            const user = (req as any).user;
-
-            if (!user) {
-                return next(new AppError("Not authorized to perform this action", "FORBIDDEN", 403));
-            }
-
-            if (user.roles && user.roles.includes("SUPER_ADMIN")) {
-                return next();
-            }
-
-            if (!user.permissions || !Array.isArray(user.permissions)) {
-                return next(new AppError("Not authorized to perform this action", "FORBIDDEN", 403));
-            }
-
-            const permList = Array.isArray(permissions) ? permissions : [permissions];
-            const hasAllPermissions = permList.every((permission) =>
-                user.permissions.includes(permission)
-            );
-
-            if (!hasAllPermissions) {
-                return next(new AppError("Not authorized to perform this action", "FORBIDDEN", 403));
-            }
-
-            next();
-        };
-    };
-
-    public checkPermissionSome = (permissions: string | string[]) => {
-        return (req: Request, res: Response, next: NextFunction) => {
-            const user = (req as any).user;
-
-            if (!user) {
-                return next(new AppError("Not authorized to perform this action", "FORBIDDEN", 403));
-            }
-
-            if (user.roles && user.roles.includes("SUPER_ADMIN")) {
-                return next();
-            }
-
-            if (!user.permissions || !Array.isArray(user.permissions)) {
-                return next(new AppError("Not authorized to perform this action", "FORBIDDEN", 403));
-            }
-
-            const permList = Array.isArray(permissions) ? permissions : [permissions];
-            const hasSomePermissions = permList.some((permission) =>
-                user.permissions.includes(permission)
-            );
-
-            if (!hasSomePermissions) {
-                return next(new AppError("Not authorized to perform this action", "FORBIDDEN", 403));
-            }
-
-            next();
-        };
     };
 }

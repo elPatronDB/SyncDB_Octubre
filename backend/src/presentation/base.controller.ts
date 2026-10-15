@@ -1,6 +1,5 @@
-import type { Request, Response } from 'express';
+import type { Response } from 'express';
 import AppError from '@shared/errors/AppError.js';
-import type { AuditContext } from '@modules/Audit/domain/audit-log.entity.js';
 
 abstract class BaseController {
     constructor() { }
@@ -19,29 +18,6 @@ abstract class BaseController {
         }
 
         return res.locals.user;
-    }
-
-    /**
-     * Extracts audit context cleanly from Express Request & Response
-     * without passing Express objects to Use Cases.
-     */
-    protected getAuditContext(req: Request, res?: Response): AuditContext {
-        const user = res?.locals?.user || (req as any).user;
-        const forwarded = req.headers['x-forwarded-for'];
-        const ip = typeof forwarded === 'string'
-            ? forwarded.split(',')[0]?.trim() || undefined
-            : req.socket?.remoteAddress || req.ip || undefined;
-
-
-        const userAgent = req.headers['user-agent'] as string | undefined;
-
-        return {
-            userId: user?.id || null,
-            ip,
-            userAgent,
-            method: req.method,
-            path: req.originalUrl || req.path
-        };
     }
 }
 

@@ -1,1 +1,1 @@
-export { default as AccessDeniedPage } from './AccessDenied.page';
+export { default as DashboardPage } from './Dashboard.page';

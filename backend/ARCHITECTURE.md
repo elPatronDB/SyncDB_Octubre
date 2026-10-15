@@ -1,120 +1,236 @@
-# Arquitectura del Backend (Clean / Hexagonal Architecture)
+# Arquitectura del Backend — SyncDB Engine
 
-Este proyecto está construido siguiendo los principios de la **Arquitectura Limpia (Clean Architecture)** y **Arquitectura Hexagonal (Ports and Adapters)**. El objetivo principal es la separación de responsabilidades, asegurando que la lógica de negocio central (el núcleo) no dependa de detalles externos como la base de datos, los frameworks web (Express) o librerías de terceros.
+Este proyecto está construido siguiendo los principios de la **Arquitectura Limpia (Clean Architecture)** y **Arquitectura Hexagonal (Ports and Adapters)** en Node.js, Express y TypeScript, utilizando Prisma ORM sobre MySQL.
 
----
-
-## 1. Estructura de Carpetas (Por Módulo)
-
-El código está estructurado en módulos (por ejemplo, `Auth`, `Users`), y dentro de cada módulo se divide en 4 capas fundamentales:
-
-### 📁 `domain/` (Dominio)
-Es el núcleo de la aplicación. Aquí residen las reglas de negocio más puras.
-- **Qué va aquí:** Entidades (modelos de datos puros en TypeScript, sin métodos de base de datos), y las **Interfaces** de los repositorios y proveedores (los "Puertos").
-- **Regla de oro:** No debe importar absolutamente nada de las otras capas (`application`, `infrastructure`, `presentation`), ni de librerías externas (como Prisma, Express, etc).
-
-### 📁 `application/` (Aplicación / Casos de Uso)
-Contiene la lógica de la aplicación y orquesta el flujo de los datos.
-- **Qué va aquí:** Los Casos de Uso (Use Cases). Cada archivo debe representar una acción específica (ej. `login.usecase.ts`, `get-profile.usecase.ts`).
-- **Regla de oro:** 
-  - **Manejo de Errores:** Aquí es donde se deben hacer las validaciones lógicas del negocio y **se lanzan los errores usando `throw new AppError(...)`**. 
-  - **Uso de Repositorios:** Los Use Cases no saben si se usa Prisma, MySQL o Mongo. Solo llaman a los métodos definidos en la interfaz del repositorio del dominio (ej. `this.authRepository.findByEmail()`).
-
-### 📁 `infrastructure/` (Infraestructura)
-Esta capa es el límite exterior. Es la única que sabe con qué base de datos o herramientas de terceros nos estamos conectando.
-- **Qué va aquí:** 
-  - Implementaciones reales de los repositorios utilizando Prisma (ej. `prisma-auth.repository.ts`).
-  - Proveedores de servicios reales (ej. `jwt.provider.ts`, `argon2-hash.provider.ts`).
-  - **Mappers:** Transforman los objetos crudos que vienen de la base de datos (Prisma) a nuestras entidades puras de `domain/`.
-
-### 📁 `presentation/` (Presentación)
-Es la puerta de entrada a la aplicación (el lado del servidor web).
-- **Qué va aquí:** Controladores (`.controller.ts`), rutas (`.routes.ts`) y esquemas de validación (usando Zod).
-- **Regla de oro:** 
-  - El controlador **no contiene lógica de negocio**. Solo recibe la petición HTTP (`req`), extrae los datos, llama al Caso de Uso y responde (`res`) usando el formato estándar (`ResponseHttp.success`).
-  - Todo error es capturado aquí y pasado al middleware global mediante `catch(error) { next(error) }`.
+El sistema se enfoca en una arquitectura **Single-User Workspace / Consola Master**: no existen roles ni permisos jerárquicos (RBAC), tablas de auditoría de logs, ni microservicios de recuperación OTP. Cada usuario registrado es dueño exclusivo de su espacio de trabajo, proyectos de calibración acústica, dispositivos y mediciones.
 
 ---
 
-## 2. Reglas Principales de Desarrollo
+## 1. Estructura de Carpetas (Schema del Proyecto)
 
-### Inyección de Dependencias (`.module.ts`)
-Para mantener el desacoplamiento, **nunca se debe instanciar un repositorio o proveedor dentro de un Use Case o Controller usando `new`**. Todo se debe inyectar por el constructor.
-En la raíz de cada módulo (ej. `auth.module.ts`) es donde ocurre la "magia" de ensamblar las piezas:
-1. Instanciamos Prisma y los proveedores (`HashProvider`, `JwtProvider`).
-2. Instanciamos el repositorio real pasándole la DB (`PrismaAuthRepository`).
-3. Instanciamos los casos de uso inyectándoles el repositorio y los proveedores.
-4. Finalmente, instanciamos el Controller inyectándole los casos de uso, para luego exportarlo y usarlo en las rutas.
-
-### Validaciones
-- **Sintácticas (Zod):** Validaciones de forma (que el email sea un email válido, que la contraseña tenga mínimo 8 caracteres). Esto se hace en la capa de `presentation/` a través de esquemas interceptados por un middleware (ej. `ValidatedMiddleware`).
-- **Semánticas (Negocio):** Validaciones lógicas (que el usuario exista, que la contraseña coincida). Estas se hacen en los Casos de Uso (`application/`) lanzando un `AppError`.
-
----
-
-## 3. Guía Técnica: Módulo de Autenticación (Auth)
-
-El módulo de Auth está diseñado para manejar la seguridad mediante JWT, guardando una única sesión activa por usuario en la base de datos (relación 1 a 1).
-
-### ¿Para qué sirve cada parte?
-
-- **`AuthUser` (Dominio):** Define la estructura del usuario en memoria. Tiene campos clave como `id`, `email`, `roles` y `permissions` extraídos a partir de una consulta relacional de Prisma (Role -> RolePermission).
-- **`AuthSession` (Dominio):** Representa la sesión. Contiene el `token` (refreshToken), `userId` y la fecha de expiración. 
-
-### ¿Cómo está conectado (Flujo de Login)?
-1. **Ruta (`auth.routes.ts`):** Recibe el POST en `/login` y pasa por el validador Zod.
-2. **Controller (`auth.controller.ts`):** Llama a `loginUseCase.execute()`.
-3. **Use Case (`login.usecase.ts`):**
-   - Llama a `authRepository.findByEmail()` para traer al usuario.
-   - Si no existe o está inactivo, hace `throw new AppError(...)`.
-   - Llama a `hashProvider.compare()` para verificar la contraseña.
-   - Si todo es correcto, llama a `jwtProvider.generateTokens()` generando 2 tokens:
-     - **Access Token:** Tiempo de vida corto (ej. 15 min). Se envía al frontend como payload de la petición HTTP. Incluye los `roles` y `permissions` incrustados.
-     - **Refresh Token:** Tiempo de vida largo (ej. 7 días). Se inyecta en una cookie `httpOnly` para mayor seguridad.
-   - Usa `authRepository.upsertSession()` asegurando que el nuevo Refresh Token sobrescriba la sesión previa en la base de datos para ese usuario único.
-4. **Respuesta:** El controller responde usando el estándar `ResponseHttp`.
-
-### El Middleware de Protección
-El `AuthMiddleware.routeProtect` lee el *Access Token* de la cabecera HTTP, lo verifica con el `jwtProvider` y extrae el usuario, guardándolo en `res.locals.user` para que casos de uso posteriores (como `GetProfileUseCase`) sepan de manera segura quién está ejecutando la petición sin tener que volver a consultar roles y permisos a la base de datos repetidamente.
-
----
-
-## 4. Guía Técnica: Módulo de Usuarios (Users)
-
-El módulo de usuarios permite gestionar las identidades dentro del sistema, implementando un CRUD estándar con una variación: **eliminación lógica**.
-
-### Entidades y DTOs (Data Transfer Objects)
-Para evitar la fuga de información sensible (como contraseñas o hashes) hacia las capas de presentación, la entidad central `User` se extiende en múltiples interfaces (`user.entity.ts`) que fungen como DTOs:
-- **`CreateUser`**: Tipado para los datos requeridos al crear.
-- **`UpdateUser`**: Tipado de campos opcionales permitidos en actualización.
-- **`GetUser`**: Entidad completa omitiendo el `passwordHash` (Ideal para retornar un perfil).
-- **`GetSimpleUser`**: Versión ligera del usuario, solo incluye información esencial (`id`, `firstName`, `lastName`, `email`, `isActive`), útil para operaciones como el listado en masa.
-
-Estos tipos especializados garantizan que tanto la base de datos (Prisma Repository) como los Casos de Uso expongan exclusivamente los datos permitidos a los Controladores.
-
-### Estructura de Casos de Uso
-- **`CreateUserUseCase`**: Hashea la contraseña utilizando `Argon2HashProvider` antes de guardarla. Valida que el email no exista.
-- **`UpdateUserUseCase`**: Permite cambiar datos básicos o contraseña. Valida colisiones de email en caso de ser actualizado.
-- **`ListUsersUseCase`**: Lista todos los usuarios devolviendo un arreglo de `GetSimpleUser`.
-- **`DisableUserUseCase` / `DeleteUserUseCase`**: Ambos ejecutan una baja lógica cambiando `isActive` a `false`. Esto previene que el usuario inicie sesión pero mantiene la integridad referencial para el historial de auditoría o transacciones pasadas.
-
-### Integración con Rutas y Validación
-Las rutas (`/users`) instancian explícitamente sus middlewares (`new AuthMiddleware()`, `new ValidatedMiddleware()`) para la inyección y protección. Utilizan Zod schemas (`CreateUserSchema`, etc.) aplicados vía `validateBody` o `validateParams` para rechazar peticiones mal formadas en la capa de presentación.
-
-### Manejo de Errores
-El módulo implementa un manejo robusto de excepciones:
-1. **Infraestructura (`PrismaUsersRepository`)**: Todos los métodos están envueltos en `try-catch` y delegan las excepciones a `PrismaErrorMapper.map(error)`. Este mapper convierte errores nativos de base de datos (e.g. código `P2002` o `P2025`) en errores genéricos de persistencia (`UniqueConstraintError`, `NotFoundPersistenceError`).
-2. **Aplicación (Casos de Uso)**: Capturan dichos errores de persistencia mediante un bloque `try-catch` y los traducen a objetos `AppError` con un `statusCode` HTTP y un `code` manejable por la capa web, evitando así que los detalles de la base de datos se filtren a la API web.
+```text
+backend/
+├── prisma/
+│   ├── schema.prisma                  # Esquema Prisma: User, UserSession, Project, Device, AudioMeasurement
+│   └── seed.ts                        # Script de inicialización idempotente (crea usuario Master por defecto)
+│
+├── src/
+│   ├── app/                           # Lógica transversal de la aplicación Express
+│   │   ├── http/
+│   │   │   └── response.http.ts       # Formateador canónico de respuestas HTTP (success, error, paginated)
+│   │   └── middleware/
+│   │       ├── Auth.middleware.ts     # Guardia Bearer JWT para verificación de identidad y extracción de contexto
+│   │       ├── Error.middleware.ts    # Interceptor global de errores (AppError, Zod, 500)
+│   │       └── Validated.middleware.ts# Interceptor de validación sintáctica de payloads con Zod
+│   │
+│   ├── infrastructure/                # Configuración de base de datos e infraestructura global
+│   │
+│   ├── modules/                       # Módulos de dominio de la aplicación
+│   │   └── Auth/                      # Módulo de Autenticación y Sesiones
+│   │       ├── domain/                # Entidades puras (AuthUser, AuthSession), Interfaces/Puertos y JwtProvider
+│   │       │   ├── auth-user.entity.ts
+│   │       │   ├── auth-session.entity.ts
+│   │       │   ├── auth.repository.ts
+│   │       │   └── jwt.provider.ts
+│   │       ├── application/           # Casos de uso (Lógica de negocio pura e independiente)
+│   │       │   ├── login.usecase.ts
+│   │       │   ├── register.usecase.ts
+│   │       │   ├── refresh-token.usecase.ts
+│   │       │   ├── get-profile.usecase.ts
+│   │       │   └── logout.usecase.ts
+│   │       ├── infrastructure/        # Adaptadores tecnológicos reales y mappers
+│   │       │   ├── prisma-auth.repository.ts
+│   │       │   └── mappers/auth.mapper.ts
+│   │       ├── presentation/          # Puerta de entrada HTTP: Rutas, Controlador y Validadores Zod
+│   │       │   ├── auth.controller.ts
+│   │       │   ├── auth.routes.ts
+│   │       │   └── validators/
+│   │       └── auth.module.ts         # Contenedor de Inyección de Dependencias del módulo
+│   │
+│   ├── presentation/                  # Controladores base y abstracciones HTTP
+│   │   └── base.controller.ts
+│   │
+│   ├── routes/                        # Enrutador centralizado
+│   │   └── index.routes.ts            # Agrupador montado bajo /api
+│   │
+│   ├── shared/                        # Módulos y utilidades compartidas
+│   │   ├── config/                    # Configuración de entorno
+│   │   ├── domain/                    # Interfaces compartidas (HashProvider, Pagination)
+│   │   ├── errors/                    # AppError centralizado
+│   │   ├── infrastructure/            # Implementaciones (Argon2HashProvider)
+│   │   ├── logger/                    # Logger con saneamiento de credenciales
+│   │   └── utils/                     # Utilidades generales
+│   │
+│   ├── app.ts                         # Configuración de Express, CORS y middlewares globales
+│   └── server.ts                      # Arranque del servidor HTTP
+```
 
 ---
 
-## 5. Guía Técnica: Módulo de Auditoría (Audit)
+## 2. Descripción de Carpetas y Responsabilidades
 
-Este módulo se encarga de dejar un rastro inmutable (o cuasi inmutable) de las acciones importantes en el sistema.
+| Carpeta | Propósito | Reglas de Dependencia |
+|---|---|---|
+| `prisma/` | Modelado de datos en base de datos y scripts de sembrado (`seed.ts`). | Contiene `schema.prisma` y genera `@prisma/client`. |
+| `src/app/` | Infraestructura HTTP transversal: wrappers de respuesta estándar y middlewares globales. | Puede ser consumida por controladores y rutas. No debe ser llamada desde la capa `domain/`. |
+| `src/modules/<Modulo>/domain/` | Núcleo del módulo: Entidades puras y contratos de repositorios/proveedores (Puertos). | **Completamente pura.** No importa Express, Prisma, Zod ni capas exteriores. |
+| `src/modules/<Modulo>/application/` | Orquestación de lógica de negocio en Casos de Uso independientes. | Depende exclusivamente de las interfaces definidas en `domain/`. Lanza `AppError`. |
+| `src/modules/<Modulo>/infrastructure/` | Implementación de persistencia con Prisma y mappers. | Implementa los contratos de `domain/`. Es la única capa que importa `@prisma/client`. |
+| `src/modules/<Modulo>/presentation/` | Rutas HTTP Express, Controladores y esquemas Zod. | Recibe peticiones HTTP, valida formato sintáctico e invoca los Casos de Uso. |
+| `src/modules/<Modulo>/<modulo>.module.ts` | Ensamblado e Inyección de Dependencias del módulo. | Instancia repositorios, proveedores, casos de uso y controlador para exportarlo listo. |
+| `src/shared/` | Proveedores y utilidades comunes (Hashing con Argon2, errores tipados, logger seguro). | Reutilizable por cualquier módulo o capa de la aplicación. |
+| `src/routes/index.routes.ts` | Agrupador maestro de rutas que expone todos los módulos bajo el prefijo `/api`. | Monta routers de módulos y aplica el middleware de manejo global de errores al final. |
 
-### Estructura de Casos de Uso
-- **`CreateAuditLogUseCase`**: Caso de uso que puede ser invocado de forma interna por otros módulos o vía endpoint (si es necesario). Recibe una acción del Enum (`LOGIN`, `CREATE`, `UPDATE`, etc), el recurso afectado y el ID del usuario responsable.
-- **`ListAuditLogsUseCase`**: Expuesto a través del controlador para poder consultar el historial.
+---
 
-### Flujo de Auditoría
-El modelo `AuditLog` incluye un campo `details` de tipo JSON en Prisma. Esto es vital para guardar diffs (cambios) de las entidades afectadas o metadatos de la conexión (como IP y User-Agent) sin necesidad de tablas complejas.
+## 3. Modelo de Dominio, Seguridad y Seed
+
+### 3.1 Sin Roles, Permisos ni OTP (Single-User Workspace)
+* Se eliminaron completamente las tablas `Role`, `Permission`, `UserRole`, `RolePermission` y `AuditLog`.
+* Se eliminó toda dependencia con el microservicio de OTP y flujos de recuperación externos.
+* El usuario autenticado es el propietario de su consola master.
+* El payload del JWT contiene únicamente la identidad del usuario (`sub: userId, email`), sin reclamos de roles ni permisos.
+
+### 3.2 Sesiones y Tokens
+1. **Access Token (JWT)**:
+   * TTL: `15m`
+   * Algoritmo: `HS256`
+   * Claims: `{ sub: user.id, email: user.email }`
+   * Transporte: Encabezado `Authorization: Bearer <token>`
+2. **Refresh Token**:
+   * TTL: `7d`
+   * Persistencia: Tabla `UserSession` en base de datos (`userId`, `token`, `expiresAt`) con relación 1:1 única.
+   * Transporte: Cookie `httpOnly`, `secure`, `sameSite: strict`.
+
+### 3.3 Inicialización con Seed (`npm run db:seed`)
+El comando ejecuta `prisma/seed.ts` para asegurar la existencia de un usuario master para pruebas y arranque:
+* **Email:** `admin@syncdb.com`
+* **Contraseña:** `Admin1234!`
+* **Nombre:** Kevin Sanchez
+
+---
+
+## 4. Documentación de Endpoints de Autenticación (`/api/auth`)
+
+### 1. `POST /api/auth/register`
+Registra una nueva cuenta de usuario y genera su sesión activa inmediata.
+* **Acceso:** Público
+* **Payload:**
+  ```json
+  {
+    "firstName": "Kevin",
+    "lastName": "Sanchez",
+    "email": "kevin@example.com",
+    "password": "Password123!"
+  }
+  ```
+* **Respuesta Exitosa (`201 Created`):**
+  ```json
+  {
+    "status": "success",
+    "message": "Registration successful",
+    "data": {
+      "accessToken": "eyJhbGciOi...",
+      "user": {
+        "id": "uuid",
+        "name": "Kevin Sanchez",
+        "firstName": "Kevin",
+        "lastName": "Sanchez",
+        "email": "kevin@example.com",
+        "avatarUrl": null,
+        "isVerify": false
+      }
+    }
+  }
+  ```
+* **Set-Cookie:** `refreshToken=<token>; HttpOnly; Path=/; SameSite=Strict`
+
+---
+
+### 2. `POST /api/auth/login`
+Inicia sesión validando credenciales mediante Argon2 y registra la sesión activa única en la base de datos.
+* **Acceso:** Público
+* **Payload:**
+  ```json
+  {
+    "email": "admin@syncdb.com",
+    "password": "Admin1234!"
+  }
+  ```
+* **Respuesta Exitosa (`200 OK`):**
+  ```json
+  {
+    "status": "success",
+    "message": "Login successful",
+    "data": {
+      "accessToken": "eyJhbGciOi...",
+      "user": {
+        "id": "uuid",
+        "name": "Kevin Sanchez",
+        "firstName": "Kevin",
+        "lastName": "Sanchez",
+        "email": "admin@syncdb.com",
+        "avatarUrl": null,
+        "isVerify": true
+      }
+    }
+  }
+  ```
+* **Set-Cookie:** `refreshToken=<token>; HttpOnly; Path=/; SameSite=Strict`
+
+---
+
+### 3. `POST /api/auth/refresh`
+Renueva el Access Token y el Refresh Token utilizando la cookie HTTP-Only.
+* **Acceso:** Público (requiere cookie `refreshToken`)
+* **Payload:** Vacío
+* **Respuesta Exitosa (`200 OK`):**
+  ```json
+  {
+    "status": "success",
+    "message": "Token renewed",
+    "data": {
+      "accessToken": "eyJhbGciOi...",
+      "user": { ... }
+    }
+  }
+  ```
+
+---
+
+### 4. `POST /api/auth/logout`
+Invalida la sesión activa del usuario en base de datos y destruye la cookie `refreshToken`.
+* **Acceso:** Protegido (`Authorization: Bearer <token>`)
+* **Respuesta Exitosa (`200 OK`):**
+  ```json
+  {
+    "status": "success",
+    "message": "Logout successful",
+    "data": null
+  }
+  ```
+
+---
+
+### 5. `GET /api/auth/me`
+Retorna el perfil del usuario autenticado en la sesión actual.
+* **Acceso:** Protegido (`Authorization: Bearer <token>`)
+* **Respuesta Exitosa (`200 OK`):**
+  ```json
+  {
+    "status": "success",
+    "message": "Profile fetched",
+    "data": {
+      "id": "uuid",
+      "name": "Kevin Sanchez",
+      "firstName": "Kevin",
+      "lastName": "Sanchez",
+      "email": "admin@syncdb.com",
+      "avatarUrl": null,
+      "isActive": true,
+      "isVerify": true,
+      "createdAt": "2026-10-15T12:00:00.000Z",
+      "updatedAt": "2026-10-15T12:00:00.000Z"
+    }
+  }
+  ```
