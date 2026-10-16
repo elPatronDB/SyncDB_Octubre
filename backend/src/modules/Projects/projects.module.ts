@@ -13,12 +13,19 @@ import { GetPublicProjectUseCase } from "./application/get-public-project.usecas
 import { RegisterDeviceUseCase } from "./application/register-device.usecase.js";
 import { UpdateDeviceLocationUseCase } from "./application/update-device-location.usecase.js";
 import { HeartbeatDeviceUseCase } from "./application/heartbeat-device.usecase.js";
+import { ProcessAcousticFrameUseCase } from "./application/process-acoustic-frame.usecase.js";
+import { GetAcousticSnapshotUseCase } from "./application/get-acoustic-snapshot.usecase.js";
+import { SaveAcousticMeasurementUseCase } from "./application/save-acoustic-measurement.usecase.js";
+import { UpdateDeviceCalibrationUseCase } from "./application/update-device-calibration.usecase.js";
 import { ProjectsController } from "./presentation/projects.controller.js";
 import { PublicController } from "./presentation/public.controller.js";
+import { AcousticController } from "./presentation/acoustic.controller.js";
+import { AcousticInMemoryStore } from "./infrastructure/acoustic-in-memory.store.js";
 
 const prisma = new PrismaClient();
 
 const projectRepository = new PrismaProjectRepository(prisma);
+const acousticStore = AcousticInMemoryStore.getInstance();
 
 const createProjectUseCase = new CreateProjectUseCase(projectRepository);
 const getProjectsUseCase = new GetProjectsUseCase(projectRepository);
@@ -34,6 +41,11 @@ const getPublicProjectUseCase = new GetPublicProjectUseCase(projectRepository);
 const registerDeviceUseCase = new RegisterDeviceUseCase(projectRepository);
 const updateDeviceLocationUseCase = new UpdateDeviceLocationUseCase(projectRepository);
 const heartbeatDeviceUseCase = new HeartbeatDeviceUseCase(projectRepository);
+
+const processAcousticFrameUseCase = new ProcessAcousticFrameUseCase(projectRepository, acousticStore);
+const getAcousticSnapshotUseCase = new GetAcousticSnapshotUseCase(projectRepository, acousticStore);
+const saveAcousticMeasurementUseCase = new SaveAcousticMeasurementUseCase(projectRepository);
+const updateDeviceCalibrationUseCase = new UpdateDeviceCalibrationUseCase(projectRepository);
 
 export const projectsController = new ProjectsController(
     createProjectUseCase,
@@ -52,4 +64,13 @@ export const publicController = new PublicController(
     registerDeviceUseCase,
     updateDeviceLocationUseCase,
     heartbeatDeviceUseCase,
+);
+
+export const acousticController = new AcousticController(
+    processAcousticFrameUseCase,
+    getAcousticSnapshotUseCase,
+    saveAcousticMeasurementUseCase,
+    updateDeviceCalibrationUseCase,
+    projectRepository,
+    acousticStore
 );

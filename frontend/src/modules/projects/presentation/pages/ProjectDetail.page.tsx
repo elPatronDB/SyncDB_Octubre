@@ -15,6 +15,8 @@ import {
     Divider,
     Switch,
     FormControlLabel,
+    Tabs,
+    Tab,
 } from '@mui/material';
 import {
     ArrowBack,
@@ -27,12 +29,14 @@ import {
     DashboardOutlined,
     EditOutlined,
     SwapHoriz,
+    GraphicEq,
 } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { PageHeader } from '../../../../shared/components/common/PageHeader';
 import ListTable, { type Column, type Action } from '../../../../shared/components/tables/ListTable';
 import ConfirmDialog from '../../../../shared/components/dialog/ConfirmDialog';
 import { ProjectFormDialog } from './ProjectForm.dialog';
+import { ProjectAcousticSuite } from '../components/acoustic/ProjectAcousticSuite';
 import {
     getProjectById,
     getProjectDevices,
@@ -52,6 +56,7 @@ export const ProjectDetailPage: React.FC = () => {
     const [project, setProject] = useState<Project | null>(null);
     const [devices, setDevices] = useState<Device[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [mainViewTab, setMainViewTab] = useState<'acoustic' | 'devices'>('acoustic');
 
     // Dialogs
     const [isEditOpen, setIsEditOpen] = useState<boolean>(false);
@@ -361,8 +366,58 @@ export const ProjectDetailPage: React.FC = () => {
                 </Stack>
             </PageHeader>
 
-            {/* Prominent Share Link Card */}
-            <Card
+            {/* View Mode Navigation Tabs */}
+            <Box sx={{ borderBottom: '1px solid #303236', mb: 3, width: '100%', maxWidth: '100%' }}>
+                <Tabs
+                    value={mainViewTab}
+                    onChange={(_, val) => setMainViewTab(val)}
+                    variant="scrollable"
+                    scrollButtons="auto"
+                    allowScrollButtonsMobile
+                    textColor="inherit"
+                    indicatorColor="primary"
+                    sx={{
+                        minHeight: 48,
+                        '& .MuiTabs-scrollButtons': {
+                            color: '#34d59a',
+                            '&.Mui-disabled': { opacity: 0.2 },
+                        },
+                        '& .MuiTabs-scroller': {
+                            overflowX: 'auto !important',
+                        },
+                        '& .MuiTab-root': {
+                            color: '#797d86',
+                            fontWeight: 600,
+                            fontSize: { xs: '13px', sm: '14px' },
+                            minHeight: 48,
+                            minWidth: { xs: 'auto', sm: 180 },
+                            whiteSpace: 'nowrap',
+                            px: { xs: 1.5, sm: 2.5 },
+                            '&.Mui-selected': { color: '#34d59a' },
+                        },
+                    }}
+                >
+                    <Tab
+                        icon={<GraphicEq sx={{ fontSize: 18 }} />}
+                        iconPosition="start"
+                        label="Análisis Acústico & Calibración PA"
+                        value="acoustic"
+                    />
+                    <Tab
+                        icon={<SensorsOutlined sx={{ fontSize: 18 }} />}
+                        iconPosition="start"
+                        label={`Dispositivos y Enlace Público (${devices.length})`}
+                        value="devices"
+                    />
+                </Tabs>
+            </Box>
+
+            {mainViewTab === 'acoustic' ? (
+                <ProjectAcousticSuite projectId={project.id} projectName={project.name} />
+            ) : (
+                <>
+                    {/* Prominent Share Link Card */}
+                    <Card
                 sx={{
                     bgcolor: '#151617',
                     border: '1px solid #303236',
@@ -550,13 +605,15 @@ export const ProjectDetailPage: React.FC = () => {
                     </Button>
                 </Stack>
 
-                <ListTable
-                    data={devices}
-                    columns={deviceColumns}
-                    actions={deviceActions}
-                    emptyMessage="No hay dispositivos registrados aún. Comparte el enlace superior para comenzar."
-                />
-            </Box>
+                    <ListTable
+                        data={devices}
+                        columns={deviceColumns}
+                        actions={deviceActions}
+                        emptyMessage="No hay dispositivos registrados aún. Comparte el enlace superior para comenzar."
+                    />
+                </Box>
+            </>
+            )}
 
             {/* Edit Project Dialog */}
             <ProjectFormDialog

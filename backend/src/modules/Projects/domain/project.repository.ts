@@ -66,4 +66,14 @@ export interface IProjectRepository {
     updateDevice(deviceId: string, projectId: string, data: Partial<DeviceEntity>): Promise<DeviceEntity>;
     deleteDevice(deviceId: string, projectId: string): Promise<void>;
     heartbeatDevice(deviceId: string): Promise<void>;
+    createMeasurement(data: {
+        projectId: string;
+        deviceId: string;
+        decibels: number;
+        peakDb?: number | null;
+        frequency?: number | null;
+        coordX?: number;
+        coordY?: number;
+        coordZ?: number | null;
+    }): Promise<any>;
 }

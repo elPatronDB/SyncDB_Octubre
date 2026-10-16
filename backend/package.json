@@ -5,7 +5,7 @@
   "main": "server.ts",
   "type": "module",
   "scripts": {
-    "test": "echo \"No tests configured\"",
+    "test": "npx tsx src/modules/Projects/__tests__/acoustic-store.test.ts",
     "dev": "cross-env NODE_ENV=development nodemon --exec node --import tsx src/server.ts",
     "db:migrate": "npx prisma migrate dev",
     "db:studio": "npx prisma studio",

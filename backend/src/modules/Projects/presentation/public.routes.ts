@@ -1,7 +1,8 @@
 import { Router } from "express";
-import { publicController } from "../projects.module.js";
+import { publicController, acousticController } from "../projects.module.js";
 import { ValidatedMiddleware } from "@app/middleware/Validated.middleware.js";
 import { registerDeviceSchema, updateLocationSchema, heartbeatSchema } from "./validators/device.schema.js";
+import { postAcousticFrameSchema } from "./validators/acoustic.schema.js";
 
 const validatedMiddleware = new ValidatedMiddleware();
 
@@ -29,6 +30,13 @@ router.post(
     '/devices/heartbeat',
     validatedMiddleware.validateBody(heartbeatSchema),
     publicController.heartbeat
+);
+
+// Real-time Acoustic Spectrum Transmission from Device (authenticated via deviceToken)
+router.post(
+    '/devices/acoustic-data',
+    validatedMiddleware.validateBody(postAcousticFrameSchema),
+    acousticController.postAcousticData
 );
 
 export default router;

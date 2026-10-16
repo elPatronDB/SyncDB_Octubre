@@ -23,6 +23,7 @@ import {
     CenterFocusStrongOutlined,
     Add,
     TuneOutlined,
+    GraphicEq,
 } from '@mui/icons-material';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import L from 'leaflet';
@@ -32,6 +33,7 @@ import { PageHeader } from '../components/common/PageHeader';
 import { getProjects, getProjectDevices, getProjectById } from '../../modules/projects/infrastructure/services/project.service';
 import type { Project, Device } from '../../modules/projects/domain/project.types';
 import { formatDate } from '../../core/utils/formatDate';
+import { ProjectAcousticSuite } from '../../modules/projects/presentation/components/acoustic/ProjectAcousticSuite';
 
 // SVG Icons for Custom Leaflet DivIcons
 const createAnchorIconHtml = (isOnline: boolean) => `
@@ -121,8 +123,8 @@ export const DashboardPage: React.FC = () => {
     const [isLoadingProjects, setIsLoadingProjects] = useState<boolean>(true);
     const [isLoadingDevices, setIsLoadingDevices] = useState<boolean>(false);
 
-    // View: 'map' (GPS) vs 'floorplan' (2D Room local)
-    const [viewMode, setViewMode] = useState<'map' | 'floorplan'>('map');
+    // View: 'map' (GPS) vs 'floorplan' (2D Room local) vs 'acoustic' (Master Analyzer)
+    const [viewMode, setViewMode] = useState<'map' | 'floorplan' | 'acoustic'>('map');
 
     // Filter markers on map: 'all' | 'anchors' | 'probes'
     const [markerFilter, setMarkerFilter] = useState<'all' | 'anchors' | 'probes'>('all');
@@ -447,6 +449,10 @@ export const DashboardPage: React.FC = () => {
                         <ToggleButton value="floorplan">
                             <GridOnOutlined sx={{ fontSize: 16, mr: 1 }} />
                             Plano del Recinto (2D)
+                        </ToggleButton>
+                        <ToggleButton value="acoustic">
+                            <GraphicEq sx={{ fontSize: 16, mr: 1 }} />
+                            Analizador Acústico Master
                         </ToggleButton>
                     </ToggleButtonGroup>
                 </Stack>
@@ -819,6 +825,15 @@ export const DashboardPage: React.FC = () => {
                         </Card>
                     )}
                 </>
+            )}
+
+            {viewMode === 'acoustic' && selectedProjectId && (
+                <Box sx={{ mt: 2 }}>
+                    <ProjectAcousticSuite
+                        projectId={selectedProjectId}
+                        projectName={selectedProject?.name || ''}
+                    />
+                </Box>
             )}
         </Box>
     );

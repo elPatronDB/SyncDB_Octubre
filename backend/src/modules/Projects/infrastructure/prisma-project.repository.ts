@@ -354,6 +354,8 @@ export class PrismaProjectRepository implements IProjectRepository {
         if (data.positionX !== undefined) updateData.positionX = data.positionX;
         if (data.positionY !== undefined) updateData.positionY = data.positionY;
         if (data.positionZ !== undefined) updateData.positionZ = data.positionZ;
+        if (data.calibrationOffsetDb !== undefined) updateData.calibrationOffsetDb = data.calibrationOffsetDb;
+        if (data.audioSpecs !== undefined) updateData.audioSpecs = data.audioSpecs;
 
         const updated = await this.prisma.device.update({
             where: {
@@ -381,6 +383,30 @@ export class PrismaProjectRepository implements IProjectRepository {
             data: {
                 lastSeenAt: new Date(),
                 status: 'CONNECTED'
+            }
+        });
+    }
+
+    async createMeasurement(data: {
+        projectId: string;
+        deviceId: string;
+        decibels: number;
+        peakDb?: number | null;
+        frequency?: number | null;
+        coordX?: number;
+        coordY?: number;
+        coordZ?: number | null;
+    }): Promise<any> {
+        return this.prisma.audioMeasurement.create({
+            data: {
+                projectId: data.projectId,
+                deviceId: data.deviceId,
+                decibels: data.decibels,
+                peakDb: data.peakDb ?? null,
+                frequency: data.frequency ?? null,
+                coordX: data.coordX ?? 0,
+                coordY: data.coordY ?? 0,
+                coordZ: data.coordZ ?? 0,
             }
         });
     }

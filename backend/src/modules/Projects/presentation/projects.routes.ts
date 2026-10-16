@@ -1,9 +1,10 @@
 import { Router } from "express";
-import { projectsController } from "../projects.module.js";
+import { projectsController, acousticController } from "../projects.module.js";
 import { AuthMiddleware } from "@app/middleware/Auth.middleware.js";
 import { ValidatedMiddleware } from "@app/middleware/Validated.middleware.js";
 import { createProjectSchema, updateProjectSchema } from "./validators/project.schema.js";
 import { adminUpdateDeviceSchema } from "./validators/device.schema.js";
+import { saveMeasurementSchema, updateCalibrationSchema } from "./validators/acoustic.schema.js";
 
 const authMiddleware = new AuthMiddleware();
 const validatedMiddleware = new ValidatedMiddleware();
@@ -24,5 +25,12 @@ router.post('/:id/regenerate-share-link', projectsController.regenerateShareLink
 router.get('/:id/devices', projectsController.getDevices);
 router.patch('/:id/devices/:deviceId', validatedMiddleware.validateBody(adminUpdateDeviceSchema), projectsController.updateDevice);
 router.delete('/:id/devices/:deviceId', projectsController.deleteDevice);
+
+// Acoustic Monitoring & PA Calibration (Master Console)
+router.get('/:id/acoustic/snapshot', acousticController.getSnapshot);
+router.get('/:id/acoustic/stream', acousticController.streamEvents);
+router.post('/:id/acoustic/reset', acousticController.resetCurves);
+router.post('/:id/acoustic/measurements', validatedMiddleware.validateBody(saveMeasurementSchema), acousticController.saveMeasurement);
+router.patch('/:id/devices/:deviceId/calibration', validatedMiddleware.validateBody(updateCalibrationSchema), acousticController.updateCalibration);
 
 export default router;

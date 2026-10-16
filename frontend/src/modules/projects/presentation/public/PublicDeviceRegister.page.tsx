@@ -26,6 +26,7 @@ import {
     Security,
 } from '@mui/icons-material';
 import { useParams } from 'react-router-dom';
+import { ClientMicAcousticPanel } from './ClientMicAcousticPanel';
 import {
     getPublicProject,
     registerPublicDevice,
@@ -499,8 +500,9 @@ export const PublicDeviceRegisterPage: React.FC = () => {
                         </CardContent>
                     </Card>
                 ) : (
-                    /* Active Connected Node Screen */
-                    <Card sx={{ bgcolor: '#151617', border: '1px solid #303236', borderRadius: '4px', p: 3 }}>
+                    <>
+                        {/* Active Connected Node Screen */}
+                        <Card sx={{ bgcolor: '#151617', border: '1px solid #303236', borderRadius: '4px', p: 3 }}>
                         <CardContent sx={{ p: 0, textAlign: 'center' }}>
                             <Box
                                 sx={{
@@ -601,6 +603,13 @@ export const PublicDeviceRegisterPage: React.FC = () => {
                             </Stack>
                         </CardContent>
                     </Card>
+
+                    {/* Real-Time Acoustic Sensor & Microphone Panel */}
+                    <ClientMicAcousticPanel
+                        deviceToken={deviceToken}
+                        initialCalibrationOffsetDb={registeredDevice.calibrationOffsetDb || 0}
+                    />
+                </>
                 )}
             </Box>
         </Box>

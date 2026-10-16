@@ -14,13 +14,18 @@ export class AuthMiddleware {
      */
     public routeProtect = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
+            let token: string | undefined;
             const authHeader = req.headers.authorization;
 
-            if (!authHeader || !authHeader.startsWith("Bearer ")) {
-                throw new AppError("Unauthorized: Token not provided", "UNAUTHORIZED", 401);
+            if (authHeader && authHeader.startsWith("Bearer ")) {
+                token = authHeader.split(" ")[1];
+            } else if (req.query.token && typeof req.query.token === "string") {
+                token = req.query.token;
             }
 
-            const token = authHeader.split(" ")[1];
+            if (!token) {
+                throw new AppError("Unauthorized: Token not provided", "UNAUTHORIZED", 401);
+            }
 
             const payload = await this.jwtProvider.verifyToken(String(token));
 
